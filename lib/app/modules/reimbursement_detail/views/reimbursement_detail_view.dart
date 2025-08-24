@@ -10,7 +10,10 @@ class ReimbursementDetailView extends GetView<ReimbursementDetailController> {
   @override
   Widget build(BuildContext context) {
     final formatter = NumberFormat.currency(
-        locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -18,32 +21,18 @@ class ReimbursementDetailView extends GetView<ReimbursementDetailController> {
         centerTitle: true,
       ),
       body: Obx(() {
-        final rawForm = (controller.data['form'] as Map?) ?? {};
-        String field(String key) =>
-            (rawForm[key] ?? controller.data[key] ?? '-').toString();
-
-        final rawItems = (controller.data['items'] as List?) ?? [];
-        final items = rawItems.map<Map<String, dynamic>>((e) {
-          final m = (e as Map?) ?? {};
-          final tujuan = (m['tujuan'] ?? '-').toString();
-          final amtRaw = m['amount'] ?? m['biaya'] ?? 0;
-
-          int amount = 0;
-          if (amtRaw is num) amount = amtRaw.toInt();
-          if (amtRaw is String) {
-            amount = int.tryParse(amtRaw.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-          }
-
-          return {"tujuan": tujuan, "amount": amount};
-        }).toList();
+        final items = controller.items;
 
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const Text('Detail Pengajuan',
-                style: TextStyle(fontWeight: FontWeight.w700)),
+            const Text(
+              'Detail Pengajuan',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 12),
 
+            // CARD DETAIL FORM
             Card(
               elevation: 1,
               shape: RoundedRectangleBorder(
@@ -55,60 +44,80 @@ class ReimbursementDetailView extends GetView<ReimbursementDetailController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      (controller.data['title'] ?? '-').toString(),
+                      controller.nama.value,
                       style: const TextStyle(
-                          fontWeight: FontWeight.w700, fontSize: 15),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
                     ),
                     const SizedBox(height: 16),
-                    _row('Nama Lengkap', field('nama')),
-                    _row('Nomor Pengembalian', field('nomor')),
-                    _row(
-                        'Tanggal Pemakaian',
-                        field('tanggal') == '-'
-                            ? (controller.data['date'] ?? '-').toString()
-                            : field('tanggal')),
-                    _row('Bank Account', field('bank')),
+                    _row('Nama Lengkap', controller.nama.value),
+                    _row('Nomor Pengembalian', controller.nomor.value),
+                    _row('Tanggal Pemakaian', controller.tanggal.value),
+                    _row('Bank Account', controller.bank.value),
                     const SizedBox(height: 12),
                     const Divider(),
                     const SizedBox(height: 8),
+
+                    // LIST ITEM
                     if (items.isEmpty)
-                      const Text('Belum ada item.', style: TextStyle(fontSize: 13))
+                      const Text('Belum ada item.',
+                          style: TextStyle(fontSize: 13))
                     else
-                      ...items.map((e) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                    child: Text(e['tujuan'] ?? '-',
-                                        style: const TextStyle(fontSize: 14))),
-                                Text(formatter.format(e['amount'] ?? 0),
-                                    style: const TextStyle(fontSize: 14)),
-                                const SizedBox(width: 8),
-                                IconButton(
-                                  icon: const Icon(Icons.file_download_outlined,
-                                      size: 20),
-                                  onPressed: () {},
+                      ...items.map(
+                        (e) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  e['tujuan'] ?? '-',
+                                  style: const TextStyle(fontSize: 14),
                                 ),
-                              ],
-                            ),
-                          )),
+                              ),
+                              Text(
+                                formatter.format(e['amount'] ?? 0),
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.file_download_outlined,
+                                  size: 20,
+                                ),
+                                onPressed: () {},
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
                     const Divider(),
                     Row(
                       children: [
                         const Expanded(
-                          child: Text('Total Keseluruhan',
-                              style: TextStyle(fontWeight: FontWeight.w700)),
+                          child: Text(
+                            'Total Keseluruhan',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
                         ),
-                        Text(controller.totalFormatted,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w700, fontSize: 15)),
+                        Text(
+                          controller.totalFormatted,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
             ),
+
             const SizedBox(height: 16),
+
+            // BUTTON KIRIM
             SafeArea(
               top: false,
               minimum: const EdgeInsets.only(bottom: 12),
@@ -125,18 +134,18 @@ class ReimbursementDetailView extends GetView<ReimbursementDetailController> {
                     final reimbursementController =
                         Get.find<ReimbursementController>();
 
-                    final total = controller.computeTotal();
-
                     final payload = {
-                      "title": controller.data['title'] ?? '-',
+                      "title": controller.nama.value,
                       "status": "Menunggu Persetujuan",
-                      "date": (controller.data['form']?['tanggal'] ??
-                              controller.data['date'] ??
-                              '-')
-                          .toString(),
-                      "form": rawForm.cast<String, dynamic>(),
-                      "items": rawItems.cast<Map>(),
-                      "total": total,
+                      "date": controller.tanggal.value,
+                      "form": {
+                        "nama": controller.nama.value,
+                        "nomor": controller.nomor.value,
+                        "tanggal": controller.tanggal.value,
+                        "bank": controller.bank.value,
+                      },
+                      "items": controller.items,
+                      "total": controller.computeTotal(),
                     };
 
                     reimbursementController.addFromForm(payload);
@@ -160,31 +169,40 @@ class ReimbursementDetailView extends GetView<ReimbursementDetailController> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Center(
-                                  child: Text('Berhasil',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700)),
+                                  child: Text(
+                                    'Berhasil',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700),
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 18),
-                              const Icon(Icons.check_circle_rounded,
-                                  size: 70, color: Colors.green),
+                              const Icon(
+                                Icons.check_circle_rounded,
+                                size: 70,
+                                color: Colors.green,
+                              ),
                               const SizedBox(height: 8),
-                              const Text('Pengajuan Berhasil Disimpan',
-                                  textAlign: TextAlign.center),
+                              const Text(
+                                'Pengajuan Berhasil Disimpan',
+                                textAlign: TextAlign.center,
+                              ),
                               const SizedBox(height: 18),
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          const Color(0xFFDF8546)),
+                                    backgroundColor: const Color(0xFFDF8546),
+                                  ),
                                   onPressed: () {
                                     Get.back(); // tutup dialog
                                     Get.offAllNamed('/reimbursement');
                                   },
-                                  child: const Text('OK',
-                                      style: TextStyle(color: Colors.white)),
+                                  child: const Text(
+                                    'OK',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                                 ),
                               )
                             ],
@@ -194,9 +212,11 @@ class ReimbursementDetailView extends GetView<ReimbursementDetailController> {
                       barrierDismissible: false,
                     );
                   },
-                  child: const Text('Kirim',
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Kirim',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ),
@@ -212,11 +232,18 @@ class ReimbursementDetailView extends GetView<ReimbursementDetailController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: 120,
-              child:
-                  Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+              width: 140,
+              child: Text(
+                label,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
-            Expanded(child: Text(value, style: const TextStyle(fontSize: 14))),
+            Expanded(
+              child: Text(
+                value,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
           ],
         ),
       );

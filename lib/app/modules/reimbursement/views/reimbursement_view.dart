@@ -49,14 +49,8 @@ class ReimbursementView extends GetView<ReimbursementController> {
                   child: Obx(
                     () => DropdownButton<String>(
                       isExpanded: true,
-                      underline: const SizedBox(),
                       value: controller.selectedStatus.value,
-                      items: [
-                        "Semua",
-                        "Menunggu Persetujuan",
-                        "Disetujui",
-                        "Ditolak"
-                      ]
+                      items: ["Semua", "Menunggu Persetujuan", "Disetujui", "Ditolak"]
                           .map((e) => DropdownMenuItem(
                                 value: e,
                                 child: Text(e),
@@ -73,9 +67,21 @@ class ReimbursementView extends GetView<ReimbursementController> {
                   child: Obx(
                     () => DropdownButton<String>(
                       isExpanded: true,
-                      underline: const SizedBox(),
                       value: controller.selectedMonth.value,
-                      items: controller.months
+                      items: [
+                        "Januari",
+                        "Februari",
+                        "Maret",
+                        "April",
+                        "Mei",
+                        "Juni",
+                        "Juli",
+                        "Agustus",
+                        "September",
+                        "Oktober",
+                        "November",
+                        "Desember"
+                      ]
                           .map((e) => DropdownMenuItem(
                                 value: e,
                                 child: Text(e),
@@ -92,7 +98,6 @@ class ReimbursementView extends GetView<ReimbursementController> {
                   child: Obx(
                     () => DropdownButton<String>(
                       isExpanded: true,
-                      underline: const SizedBox(),
                       value: controller.selectedYear.value,
                       items: ["2023", "2024", "2025"]
                           .map((e) => DropdownMenuItem(
@@ -114,16 +119,10 @@ class ReimbursementView extends GetView<ReimbursementController> {
               child: Obx(() {
                 final data = controller.filteredList;
                 if (data.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(Icons.inbox, size: 56, color: Colors.grey),
-                        SizedBox(height: 8),
-                        Text("Tidak ada data",
-                            style:
-                                TextStyle(fontSize: 16, color: Colors.grey)),
-                      ],
+                  return const Center(
+                    child: Text(
+                      "Tidak ada data",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                   );
                 }
@@ -132,9 +131,8 @@ class ReimbursementView extends GetView<ReimbursementController> {
                   itemCount: data.length,
                   itemBuilder: (context, index) {
                     final item = data[index];
-                    final statusColor = getStatusColor(item["status"]);
                     return Card(
-                      elevation: 2,
+                      elevation: 3,
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -144,39 +142,49 @@ class ReimbursementView extends GetView<ReimbursementController> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Judul + tanggal
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Expanded(
                                   child: Text(
-                                    item["title"] ?? '-',
+                                    item["title"],
                                     style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
                                   ),
                                 ),
                                 Text(
-                                  item["date"] ?? '-',
+                                  item["date"],
                                   style: const TextStyle(
-                                      color: Colors.grey, fontSize: 13),
+                                    color: Colors.grey,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 6),
+
+                            // Badge status
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.1),
+                                color: getStatusColor(item["status"])
+                                    .withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: statusColor),
+                                border: Border.all(
+                                  color: getStatusColor(item["status"]),
+                                ),
                               ),
                               child: Text(
-                                (item["status"] ?? '-').toUpperCase(),
+                                item["status"].toUpperCase(),
                                 style: TextStyle(
-                                    color: statusColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12),
+                                  color: getStatusColor(item["status"]),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
                           ],

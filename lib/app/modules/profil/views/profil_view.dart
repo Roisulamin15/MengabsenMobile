@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_mengabsen/app/routes/app_pages.dart';
 import 'package:get/get.dart';
-import 'dart:io';
+import '../controllers/profil_controller.dart';
 
 class ProfilView extends StatelessWidget {
-  const ProfilView({super.key});
+  ProfilView({super.key});
+  final ProfilController controller = Get.put(ProfilController());
 
   @override
   Widget build(BuildContext context) {
-    const Color iconColor = Colors.black; // icon hitam
-    const Color textColor = Colors.grey; // teks abu-abu
+    const Color iconColor = Colors.black;
+    const Color textColor = Colors.grey;
 
     return Scaffold(
       appBar: AppBar(
@@ -39,27 +40,27 @@ class ProfilView extends StatelessWidget {
                     backgroundImage: AssetImage("assets/izul.jpg"),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Halo, Muhammad Roisul Amin",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "Jakarta, Indonesia",
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
+                  Expanded(
+                    child: Obx(() => Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Halo, ${controller.nama.value}",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              controller.email.value,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        )),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -85,7 +86,7 @@ class ProfilView extends StatelessWidget {
             buildMenuItem(Icons.language, "Bahasa", () {
               Get.toNamed(Routes.PILIH_BAHASA);
             }, iconColor, textColor),
-           buildMenuItem(Icons.location_on, "Alamat saya", () {
+            buildMenuItem(Icons.location_on, "Alamat saya", () {
               Get.toNamed(Routes.ALAMAT_SAYA);
             }, iconColor, textColor),
             buildMenuItem(Icons.privacy_tip, "Kebijakan Privasi", () {}, iconColor, textColor),
@@ -101,7 +102,12 @@ class ProfilView extends StatelessWidget {
   }
 
   Widget buildMenuItem(
-      IconData icon, String title, VoidCallback onTap, Color iconColor, Color textColor) {
+    IconData icon,
+    String title,
+    VoidCallback onTap,
+    Color iconColor,
+    Color textColor,
+  ) {
     return ListTile(
       leading: Icon(icon, color: iconColor),
       title: Text(title, style: TextStyle(color: textColor)),
@@ -111,6 +117,8 @@ class ProfilView extends StatelessWidget {
   }
 
   void _showLogoutDialog(BuildContext context) {
+    final ProfilController controller = Get.find();
+
     Get.dialog(
       AlertDialog(
         backgroundColor: Colors.white,
@@ -142,7 +150,8 @@ class ProfilView extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             onPressed: () {
-              exit(0); // keluar dari aplikasi
+              controller.logout();
+              Get.offAllNamed(Routes.LOGIN_EMAIL); // Arahkan ke halaman login
             },
             child: const Text("Iya", style: TextStyle(color: Colors.black)),
           ),

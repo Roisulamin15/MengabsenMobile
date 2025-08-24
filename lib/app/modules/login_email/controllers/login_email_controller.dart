@@ -1,6 +1,7 @@
 import 'package:flutter_application_mengabsen/services/api_service.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../home/views/home_view.dart';
 
 class LoginEmailController extends GetxController {
@@ -8,6 +9,8 @@ class LoginEmailController extends GetxController {
   final passwordController = TextEditingController();
   var rememberMe = true.obs;
   var token = "".obs;
+
+  final storage = GetStorage();
 
   void login() async {
     String email = emailController.text.trim();
@@ -25,15 +28,20 @@ class LoginEmailController extends GetxController {
       if (data['success'] == true) {
         token.value = data['token'];
 
-        // Jika login berhasil, pindah ke HomeView (Dashboard)
+        // Simpan data user ke GetStorage
+        storage.write("nama", data['nama'] ?? "Pengguna");
+        storage.write("email", data['email'] ?? email);
+        storage.write("jabatan", data['jabatan'] ?? "Karyawan");
+
+        // Pindah ke dashboard
         Get.off(() => HomeView());
       } else {
-        // Kalau gagal, tampilkan pesan dari backend
         Get.snackbar("Login Gagal", data['message'] ?? "Terjadi kesalahan",
             snackPosition: SnackPosition.BOTTOM);
       }
     } catch (e) {
-      Get.snackbar("Error", "Tidak bisa terhubung ke server",
+      print("Error login: $e");
+      Get.snackbar("Error", "Gagal konek: $e",
           snackPosition: SnackPosition.BOTTOM);
     }
   }

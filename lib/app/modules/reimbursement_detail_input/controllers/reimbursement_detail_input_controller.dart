@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mengabsen/app/modules/reimbursement_detail/controllers/reimbursement_detail_controller.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
@@ -73,40 +74,27 @@ class ReimbursementDetailInputController extends GetxController {
 
   /// Simpan data & navigasi ke detail
   void save() {
-    if (formKey.currentState?.validate() == true) {
-      final now = DateTime.now();
+  if (formKey.currentState?.validate() == true) {
+    final detailController = Get.find<ReimbursementDetailController>();
 
-      // Nomor unik, lebih readable
-      final nomor =
-          "${now.year}/${now.month.toString().padLeft(2, '0')}/RE/${now.millisecondsSinceEpoch}";
+    for (var item in items) {
+      final raw = item.biayaC.text.replaceAll(RegExp(r'[^0-9]'), '');
+      detailController.addItem({
+        "tujuan": item.tujuan.value ?? "-",
+        "amount": int.tryParse(raw) ?? 0,
+        "type": type,
+      });
+    }
 
-      final data = {
-        "nama": "Taufik Nur Abadi",
-        "nomor": nomor,
-        "tanggal": DateFormat("dd/MMM/yyyy", "id_ID").format(now),
-        "bank": "BNI",
-        "title": "Penggantian $type",
-        "items": items.map((e) {
-          final raw = e.biayaC.text.replaceAll(RegExp(r'[^0-9]'), '');
-          return {
-            "tujuan": e.tujuan.value ?? "-",
-            "amount": int.tryParse(raw) ?? 0,
-          };
-        }).toList(),
-      };
-
-      // Navigasi ke halaman detail + kirim data
-      Get.toNamed('/reimbursement-detail', arguments: data);
-    } else {
-      Get.snackbar(
-        "Gagal",
-        "Harap isi semua data dengan benar",
+    Get.back(); // Balik ke form utama
+  } else {
+    Get.snackbar("Gagal", "Harap isi semua data dengan benar",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    }
+        colorText: Colors.white);
   }
+}
+
 
   @override
   void onClose() {

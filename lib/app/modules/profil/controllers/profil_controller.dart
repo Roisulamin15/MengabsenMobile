@@ -1,23 +1,24 @@
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 class ProfilController extends GetxController {
-  //TODO: Implement ProfilController
+  final box = GetStorage();
 
-  final count = 0.obs;
+  var nama = ''.obs;
+  var email = ''.obs;
+
   @override
   void onInit() {
     super.onInit();
+    ambilDataUser();
   }
 
-  @override
-  void onReady() {
-    super.onReady();
+  void ambilDataUser() {
+    nama.value = box.read('name') ?? 'Pengguna';
+    email.value = box.read('email') ?? 'Email belum tersedia';
   }
 
-  @override
-  void onClose() {
-    super.onClose();
+  void logout() {
+    box.erase(); // Hapus semua data user dari penyimpanan
   }
-
-  void increment() => count.value++;
 }
