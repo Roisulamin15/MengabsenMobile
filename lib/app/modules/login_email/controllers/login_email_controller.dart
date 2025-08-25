@@ -28,10 +28,17 @@ class LoginEmailController extends GetxController {
       if (data['success'] == true) {
         token.value = data['token'];
 
+        final user = data['user'];
+
         // Simpan data user ke GetStorage
-        storage.write("nama", data['nama'] ?? "Pengguna");
-        storage.write("email", data['email'] ?? email);
-        storage.write("jabatan", data['jabatan'] ?? "Karyawan");
+        storage.write("nama", user['name'] ?? "Pengguna");
+        storage.write("email", user['email'] ?? email);
+        storage.write("jabatan", user['role'] ?? "Karyawan");
+
+         print("Nama disimpan: ${user['name']}");
+         print("Email disimpan: ${user['email']}");
+         print("Role disimpan: ${user['role']}");
+         
 
         // Pindah ke dashboard
         Get.off(() => HomeView());

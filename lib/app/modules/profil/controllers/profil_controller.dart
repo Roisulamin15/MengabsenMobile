@@ -14,7 +14,8 @@ class ProfilController extends GetxController {
   }
 
   void ambilDataUser() {
-    nama.value = box.read('name') ?? 'Pengguna';
+    // Samakan key dengan yang dipakai waktu login
+    nama.value = box.read('nama') ?? 'Pengguna';
     email.value = box.read('email') ?? 'Email belum tersedia';
   }
 

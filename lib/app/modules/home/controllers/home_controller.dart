@@ -18,6 +18,7 @@ class HomeController extends GetxController {
   }
 
   void ambilDataPengguna() {
+    // ambil data user hasil login
     nama.value = storage.read("nama") ?? "Pengguna";
     jabatan.value = storage.read("jabatan") ?? "Karyawan";
   }
@@ -25,17 +26,31 @@ class HomeController extends GetxController {
   void _loadAbsenDummy() {
     absenHariIni.assignAll([
       {
-        "jam": "08:05",
-        "tanggal": "24 Agustus 2025",
-        "status": "Masuk",
+        "jenis": "Masuk",
+        "jam": "09:00 WIB",
+        "tanggal": "Selasa, 13 Mei 2023",
+        "status": "Sudah Absen",
+      },
+      {
+        "jenis": "Pulang",
+        "jam": "17:30 WIB",
+        "tanggal": "Selasa, 13 Mei 2023",
+        "status": "Sudah Absen",
       },
     ]);
 
     absenKemarin.assignAll([
       {
-        "jam": "08:10",
-        "tanggal": "23 Agustus 2025",
-        "status": "Masuk",
+        "jenis": "Masuk",
+        "jam": "09:05 WIB",
+        "tanggal": "Senin, 12 Mei 2023",
+        "status": "Sudah Absen",
+      },
+      {
+        "jenis": "Pulang",
+        "jam": "17:30 WIB",
+        "tanggal": "Senin, 12 Mei 2023",
+        "status": "Sudah Absen",
       },
     ]);
   }
