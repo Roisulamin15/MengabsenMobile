@@ -16,6 +16,14 @@ import '../modules/halaman_login/bindings/halaman_login_binding.dart';
 import '../modules/halaman_login/views/halaman_login_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
+import '../modules/hrd_cuti/bindings/hrd_cuti_binding.dart';
+import '../modules/hrd_cuti/views/hrd_cuti_view.dart';
+import '../modules/hrd_detail_cuti/bindings/hrd_detail_cuti_binding.dart';
+import '../modules/hrd_detail_cuti/views/hrd_detail_cuti_view.dart';
+import '../modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
+import '../modules/karyawan_absen/views/karyawan_absen_view.dart';
+import '../modules/karyawan_absen_wfo_wfh/bindings/karyawan_absen_wfo_wfh_binding.dart';
+import '../modules/karyawan_absen_wfo_wfh/views/karyawan_absen_wfo_wfh_view.dart';
 import '../modules/list_cuti/bindings/list_cuti_binding.dart';
 import '../modules/list_cuti/views/list_cuti_view.dart';
 import '../modules/login_email/bindings/login_email_binding.dart';
@@ -36,6 +44,12 @@ import '../modules/reimbursement_form/bindings/reimbursement_form_binding.dart';
 import '../modules/reimbursement_form/views/reimbursement_form_view.dart';
 import '../modules/reimbursement_type/bindings/reimbursement_type_binding.dart';
 import '../modules/reimbursement_type/views/reimbursement_type_view.dart';
+import '../modules/surat_tugas/bindings/surat_tugas_binding.dart';
+import '../modules/surat_tugas/views/surat_tugas_view.dart';
+import '../modules/surat_tugas_detail/bindings/surat_tugas_detail_binding.dart';
+import '../modules/surat_tugas_detail/controllers/surat_tugas_detail_controller.dart';
+import '../modules/surat_tugas_form/bindings/surat_tugas_form_binding.dart';
+import '../modules/surat_tugas_form/views/surat_tugas_form_view.dart';
 import '../modules/ubah_password/bindings/ubah_password_binding.dart';
 import '../modules/ubah_password/views/ubah_password_view.dart';
 import '../modules/verifikasi_email/bindings/verifikasi_email_binding.dart';
@@ -46,7 +60,7 @@ part 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.LOGIN_EMAIL;
+  static const INITIAL = Routes.KARYAWAN_ABSEN;
 
   static final routes = [
     GetPage(
@@ -86,7 +100,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.PROFIL,
-      page: () =>  ProfilView(),
+      page: () => ProfilView(),
       binding: ProfilBinding(),
     ),
     GetPage(
@@ -145,9 +159,48 @@ class AppPages {
       binding: ReimbursementDetailInputBinding(),
     ),
     GetPage(
-      name: _Paths.REIMBURSEMENT_DETAIL,
-      page: () =>  ReimbursementDetailView(),
+      name: Routes.REIMBURSEMENT_DETAIL,
+      page: () => ReimbursementDetailView(),
       binding: ReimbursementDetailBinding(),
     ),
+    GetPage(
+      name: Routes.SURAT_TUGAS,
+      page: () => const SuratTugasView(),
+      binding: SuratTugasBinding(),
+    ),
+    GetPage(
+      name: Routes.SURAT_TUGAS_FORM,
+      page: () => const SuratTugasFormView(),
+      binding: SuratTugasFormBinding(),
+    ),
+    GetPage(
+      name: Routes.SURAT_TUGAS_DETAIL,
+      page: () => const SuratTugasDetailView(),
+      binding: SuratTugasDetailBinding(),
+    ),
+    GetPage(
+      name: _Paths.HRD_CUTI,
+      page: () => const HrdCutiView(),
+      binding: HrdCutiBinding(),
+    ),
+    GetPage(
+      name: _Paths.HRD_DETAIL_CUTI,
+      page: () => HrdDetailCutiView(cuti: Get.arguments),
+      binding: HrdDetailCutiBinding(),
+    ),
+    GetPage(
+      name: _Paths.KARYAWAN_ABSEN,
+      page: () => const KaryawanAbsenView(),
+      binding: KaryawanAbsenBinding(),
+    ),
+    GetPage(
+      name: _Paths.KARYAWAN_ABSEN_WFO_WFH,
+      page: () {
+        final jenis = Get.arguments ?? "WFO";
+        return KaryawanAbsenWfoWfhView(jenis: jenis);
+      },
+      binding: KaryawanAbsenWfoWfhBinding(),
+    ),
+
   ];
 }

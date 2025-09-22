@@ -23,6 +23,13 @@ abstract class Routes {
   static const REIMBURSEMENT_TYPE = _Paths.REIMBURSEMENT_TYPE;
   static const REIMBURSEMENT_DETAIL_INPUT = _Paths.REIMBURSEMENT_DETAIL_INPUT;
   static const REIMBURSEMENT_DETAIL = _Paths.REIMBURSEMENT_DETAIL;
+  static const SURAT_TUGAS = _Paths.SURAT_TUGAS;
+  static const SURAT_TUGAS_FORM = _Paths.SURAT_TUGAS_FORM;
+  static const SURAT_TUGAS_DETAIL = _Paths.SURAT_TUGAS_DETAIL;
+  static const HRD_CUTI = _Paths.HRD_CUTI;
+  static const HRD_DETAIL_CUTI = _Paths.HRD_DETAIL_CUTI;
+  static const KARYAWAN_ABSEN = _Paths.KARYAWAN_ABSEN;
+  static const KARYAWAN_ABSEN_WFO_WFH = _Paths.KARYAWAN_ABSEN_WFO_WFH;
 }
 
 abstract class _Paths {
@@ -47,4 +54,11 @@ abstract class _Paths {
   static const REIMBURSEMENT_TYPE = '/reimbursement-type';
   static const REIMBURSEMENT_DETAIL_INPUT = '/reimbursement-detail-input';
   static const REIMBURSEMENT_DETAIL = '/reimbursement-detail';
+  static const SURAT_TUGAS = '/surat-tugas';
+  static const SURAT_TUGAS_FORM = '/surat-tugas-form';
+  static const SURAT_TUGAS_DETAIL = '/surat-tugas-detail';
+  static const HRD_CUTI = '/hrd-cuti';
+  static const HRD_DETAIL_CUTI = '/hrd-detail-cuti';
+  static const KARYAWAN_ABSEN = '/karyawan-absen';
+  static const KARYAWAN_ABSEN_WFO_WFH = '/karyawan-absen-wfo-wfh';
 }

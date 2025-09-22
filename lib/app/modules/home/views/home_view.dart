@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mengabsen/app/modules/surat_tugas/bindings/surat_tugas_binding.dart';
+import 'package:flutter_application_mengabsen/app/modules/surat_tugas/views/surat_tugas_view.dart';
 import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
 import 'package:flutter_application_mengabsen/app/modules/list_cuti/views/list_cuti_view.dart';
@@ -177,7 +179,9 @@ class _HomeViewState extends State<HomeView> {
           ),
           Expanded(
               child: _buildMenuButton(
-                  Icons.assignment, "Surat Tugas", Colors.orange, () {})),
+                  Icons.assignment, "Surat Tugas", Colors.orange, () {
+                    Get.to(() => SuratTugasView(), binding: SuratTugasBinding());
+                  })),
           Expanded(
               child: _buildMenuButton(
                   Icons.receipt_long, "Slip Gaji", Colors.orange, () {})),

@@ -3,18 +3,22 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class CutiController extends GetxController {
+  // Observables
   var selectedJabatan = "".obs;
   var selectedIzin = "".obs;
   var tanggalPengajuan = DateTime.now().obs;
   var tanggalMulai = DateTime.now().obs;
   var tanggalSelesai = DateTime.now().obs;
 
+  // Controllers
   final namaController = TextEditingController();
   final nikController = TextEditingController();
   final alasanController = TextEditingController();
 
+  // Data list
   var cutiList = <Map<String, dynamic>>[].obs;
 
+  // Pilihan jabatan
   final List<String> jabatanList = [
     "Project Manager",
     "Head of Business Analyst",
@@ -32,12 +36,15 @@ class CutiController extends GetxController {
     "Project & Admin Assistant",
   ];
 
+  // Pilihan izin
   final List<String> izinList = ["Sakit", "Izin", "Cuti"];
 
+  // Format tanggal
   String formatTanggal(DateTime date) {
     return DateFormat("dd/MM/yyyy").format(date);
   }
 
+  // Ajukan cuti
   void ajukanCuti(BuildContext context) {
     if (selectedIzin.value.isEmpty) {
       Get.snackbar(
@@ -59,6 +66,7 @@ class CutiController extends GetxController {
       return;
     }
 
+    // Tambah data cuti
     cutiList.add({
       "nama": namaController.text,
       "nik": nikController.text,
@@ -73,17 +81,21 @@ class CutiController extends GetxController {
       "form_cuti": "",
     });
 
+    // Reset form
     selectedJabatan.value = "";
     selectedIzin.value = "";
     namaController.clear();
     nikController.clear();
     alasanController.clear();
 
+    // Tampilkan dialog sukses
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -118,13 +130,18 @@ class CutiController extends GetxController {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
                 onPressed: () {
                   Navigator.of(context).pop();
                   Get.back();
                 },
-                child: const Text("OK", style: TextStyle(color: Colors.white)),
+                child: const Text(
+                  "OK",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
