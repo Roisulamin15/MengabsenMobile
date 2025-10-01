@@ -11,6 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  #Plugin
+  image_picker: ^1.1.2
+
   # UI & Icon
   flutter_spinkit: ^5.2.0
   cupertino_icons: ^1.0.8

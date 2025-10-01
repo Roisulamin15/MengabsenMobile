@@ -1,90 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import '../controllers/edit_profil_controller.dart';
 
-class EditProfilView extends StatefulWidget {
+class EditProfilView extends GetView<EditProfilController> {
   const EditProfilView({super.key});
-
-  @override
-  State<EditProfilView> createState() => _EditProfilViewState();
-}
-
-class _EditProfilViewState extends State<EditProfilView> {
-  final namaController = TextEditingController();
-  final hpController = TextEditingController();
-  final emailController = TextEditingController();
-  final tglLahirController = TextEditingController();
-  final ktpController = TextEditingController();
-  final pasporController = TextEditingController();
-  final alamatController = TextEditingController();
-
-  String? jenisKelamin;
-  String? provinsi;
-  String? kabupaten;
-  String? kecamatan;
-  String? kota;
-
-  void showResultDialog({
-    required bool isSuccess,
-    required String title,
-    required String message,
-  }) {
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSuccess ? Colors.orange : Colors.red,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Icon(
-                isSuccess ? Icons.check_circle : Icons.error,
-                color: isSuccess ? Colors.green : Colors.red,
-                size: 60,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: const Text("OK"),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,108 +20,107 @@ class _EditProfilViewState extends State<EditProfilView> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Card profil + SVG
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.orange,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 30,
-                    backgroundImage: AssetImage("assets/izul.jpg"),
+            // 🔹 Card profil (ambil username + role + foto)
+            Obx(() => Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          "Halo, Muhammad Roisul Amin",
-                          style: TextStyle(color: Colors.white, fontSize: 18),
-                          overflow: TextOverflow.ellipsis,
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => controller.pilihFoto(),
+                        child: CircleAvatar(
+                          radius: 30,
+                          backgroundImage: controller.fotoProfil.value.isNotEmpty
+                              ? FileImage(File(controller.fotoProfil.value))
+                              : const AssetImage("assets/izul.jpg")
+                                  as ImageProvider,
                         ),
-                        Text(
-                          "Jakarta, Indonesia",
-                          style: TextStyle(color: Colors.white70, fontSize: 14),
-                          overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Halo, ${controller.username.value}",
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 18),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              controller.role.value,
+                              style: const TextStyle(
+                                  color: Colors.white70, fontSize: 14),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 8),
+                      SvgPicture.asset(
+                        'assets/vector.svg',
+                        height: 40,
+                        width: 40,
+                        fit: BoxFit.contain,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  SvgPicture.asset(
-                    'assets/vector.svg',
-                    height: 40,
-                    width: 40,
-                    fit: BoxFit.contain,
-                  ),
-                ],
-              ),
-            ),
+                )),
             const SizedBox(height: 20),
 
-            // Form fields
-            buildTextField("Nama Lengkap", "Nama sesuai identitas", namaController),
-            buildTextField("Nomor HP", "62 XXX XXX XXX", hpController,
+            // 🔹 Form fields
+            buildTextField("Nama Lengkap", "Nama sesuai identitas",
+                controller.namaController),
+            buildTextField("Nomor HP", "62 XXX XXX XXX", controller.hpController,
                 keyboardType: TextInputType.phone),
             buildTextField("Alamat Email", "isi dengan alamat email aktifmu",
-                emailController,
+                controller.emailController,
                 keyboardType: TextInputType.emailAddress),
             buildTextField("Tanggal Lahir",
-                "tanggal/bulan/tahun contoh 01/01/2000", tglLahirController,
+                "tanggal/bulan/tahun contoh 01/01/2000", controller.tglLahirController,
                 suffixIcon: Icons.calendar_today),
             buildDropdown("Jenis Kelamin",
-                ["Laki-laki", "Perempuan", "Lainnya"], jenisKelamin, (val) {
-              setState(() => jenisKelamin = val);
+                ["Laki-laki", "Perempuan", "Lainnya"],
+                controller.jenisKelamin.value, (val) {
+              controller.jenisKelamin.value = val;
             }),
             buildTextField("Nomor e-KTP/SIM (Opsional)",
-                "16 digit nomor KTP/17 digit nomor SIM", ktpController),
+                "16 digit nomor KTP/17 digit nomor SIM", controller.ktpController),
             buildTextField("Nomor ID Paspor (Opsional)",
-                "7 digit nomor paspor", pasporController),
+                "7 digit nomor paspor", controller.pasporController),
             buildDropdown("Provinsi (Opsional)",
-                ["Jawa Tengah", "Jawa Barat", "DKI Jakarta"], provinsi, (val) {
-              setState(() => provinsi = val);
+                ["Jawa Tengah", "Jawa Barat", "DKI Jakarta"],
+                controller.provinsi.value, (val) {
+              controller.provinsi.value = val;
             }),
             buildDropdown("Kabupaten (Opsional)",
-                ["Kabupaten 1", "Kabupaten 2"], kabupaten, (val) {
-              setState(() => kabupaten = val);
+                ["Kabupaten 1", "Kabupaten 2"],
+                controller.kabupaten.value, (val) {
+              controller.kabupaten.value = val;
             }),
             buildDropdown("Kecamatan (Opsional)",
-                ["Kecamatan 1", "Kecamatan 2"], kecamatan, (val) {
-              setState(() => kecamatan = val);
+                ["Kecamatan 1", "Kecamatan 2"],
+                controller.kecamatan.value, (val) {
+              controller.kecamatan.value = val;
             }),
-            buildDropdown("Kota (Opsional)", ["Kota 1", "Kota 2"], kota, (val) {
-              setState(() => kota = val);
+            buildDropdown("Kota (Opsional)",
+                ["Kota 1", "Kota 2"], controller.kota.value, (val) {
+              controller.kota.value = val;
             }),
             buildTextField("Alamat (Opsional)", "Isi alamat lengkapmu",
-                alamatController,
+                controller.alamatController,
                 maxLines: 3),
 
             const SizedBox(height: 20),
 
-            // Tombol simpan
+            // 🔹 Tombol simpan
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  if (namaController.text.isNotEmpty) {
-                    showResultDialog(
-                      isSuccess: true,
-                      title: "Data Berhasil Disimpan",
-                      message:
-                          "Perubahan berhasil disimpan\nSilahkan menunggu konfirmasi dari admin.",
-                    );
-                  } else {
-                    showResultDialog(
-                      isSuccess: false,
-                      title: "Terjadi Kesalahan",
-                      message: "Coba lagi nanti",
-                    );
-                  }
-                },
+                onPressed: () => controller.simpanData(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   padding: const EdgeInsets.symmetric(vertical: 14),
@@ -220,15 +140,14 @@ class _EditProfilViewState extends State<EditProfilView> {
     );
   }
 
-  Widget buildTextField(
-      String label, String hint, TextEditingController controller,
+  Widget buildTextField(String label, String hint, TextEditingController c,
       {TextInputType keyboardType = TextInputType.text,
       IconData? suffixIcon,
       int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextField(
-        controller: controller,
+        controller: c,
         keyboardType: keyboardType,
         maxLines: maxLines,
         decoration: InputDecoration(
@@ -246,7 +165,7 @@ class _EditProfilViewState extends State<EditProfilView> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: value,
+        value: value?.isEmpty == true ? null : value,
         items: items
             .map((e) => DropdownMenuItem(value: e, child: Text(e)))
             .toList(),

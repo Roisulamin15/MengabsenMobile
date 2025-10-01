@@ -12,7 +12,7 @@ class HrdCutiController extends GetxController {
 
   // Simulasi ambil API
   void fetchData() {
-    cutiList.value = [
+    cutiList.assignAll([
       {
         "nama": "Taufik Nur Abadi",
         "status": "Belum Review",
@@ -43,9 +43,15 @@ class HrdCutiController extends GetxController {
         "alasan": "Demam Tinggi",
         "lampiran": "PengajuanCutiFredrik09082024.pdf",
       },
-    ];
+    ]);
   }
 
+  /// Tambah data cuti baru (misal dari form CutiView)
+  void tambahCuti(Map<String, dynamic> data) {
+    cutiList.add(data);
+  }
+
+  /// Dialog konfirmasi
   void showKonfirmasi(BuildContext context, bool disetujui) {
     showDialog(
       context: context,
@@ -82,8 +88,8 @@ class HrdCutiController extends GetxController {
               const SizedBox(height: 10),
               Text(
                 disetujui
-                    ? "Permintaan cuti telah anda setujui\nNotifikasi ini akan dikirim kepada staff."
-                    : "Permintaan cuti telah anda tolak karena terlalu banyak pengajuan.\nNotifikasi ini akan dikirim kepada staff.",
+                    ? "Permintaan cuti telah disetujui.\nNotifikasi akan dikirim kepada staff."
+                    : "Permintaan cuti ditolak karena alasan tertentu.\nNotifikasi akan dikirim kepada staff.",
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 14),
               ),

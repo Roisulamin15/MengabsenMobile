@@ -4,8 +4,8 @@ import 'package:get_storage/get_storage.dart';
 class HomeController extends GetxController {
   final storage = GetStorage();
 
-  var nama = "Pengguna".obs;
-  var jabatan = "Karyawan".obs;
+  var username = "Pengguna".obs;
+  var role = "Karyawan".obs;
 
   var absenHariIni = <Map<String, String>>[].obs;
   var absenKemarin = <Map<String, String>>[].obs;
@@ -19,8 +19,8 @@ class HomeController extends GetxController {
 
   void ambilDataPengguna() {
     // ambil data user hasil login
-    nama.value = storage.read("nama") ?? "Pengguna";
-    jabatan.value = storage.read("jabatan") ?? "Karyawan";
+    username.value = storage.read("username") ?? "Pengguna";
+    role.value = storage.read("role") ?? "Karyawan";
   }
 
   void _loadAbsenDummy() {

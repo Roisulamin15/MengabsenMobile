@@ -45,5 +45,12 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- 🔑 Permission kamera & galeri -->
+	<key>NSCameraUsageDescription</key>
+	<string>App membutuhkan akses ke kamera untuk mengambil foto profil.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>App membutuhkan akses ke galeri untuk memilih foto profil.</string>
+
 </dict>
 </plist>

@@ -4,7 +4,7 @@ import 'package:get_storage/get_storage.dart';
 class ProfilController extends GetxController {
   final box = GetStorage();
 
-  var nama = ''.obs;
+  var username = ''.obs;
   var email = ''.obs;
 
   @override
@@ -15,7 +15,7 @@ class ProfilController extends GetxController {
 
   void ambilDataUser() {
     // Samakan key dengan yang dipakai waktu login
-    nama.value = box.read('nama') ?? 'Pengguna';
+    username.value = box.read('username') ?? 'Pengguna';
     email.value = box.read('email') ?? 'Email belum tersedia';
   }
 

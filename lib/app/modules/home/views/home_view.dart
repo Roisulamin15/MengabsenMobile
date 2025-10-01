@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mengabsen/app/modules/hrd_cuti/views/hrd_cuti_view.dart';
+import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
+import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/views/karyawan_absen_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/surat_tugas/bindings/surat_tugas_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/surat_tugas/views/surat_tugas_view.dart';
 import 'package:get/get.dart';
@@ -99,10 +102,12 @@ class _HomeViewState extends State<HomeView> {
       bottomNavigationBar: _buildBottomNavigation(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.camera_alt),
-        onPressed: () {},
-      ),
+      backgroundColor: Colors.orange,
+      child: const Icon(Icons.camera_alt),
+      onPressed: () {
+        Get.to(() => const KaryawanAbsenView(), binding: KaryawanAbsenBinding());
+      },
+    ),
     );
   }
 
@@ -142,12 +147,12 @@ class _HomeViewState extends State<HomeView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Halo, ${controller.nama.value}",
+                      "Halo, ${controller.username.value}",
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      controller.jabatan.value,
+                      controller.role.value,
                       style: const TextStyle(color: Colors.white70, fontSize: 14),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -167,8 +172,15 @@ class _HomeViewState extends State<HomeView> {
         children: [
           Expanded(
             child: _buildMenuButton(Icons.event, "Cuti", Colors.orange, () {
+            final role = controller.role.value.toLowerCase();
+
+            if (role == "hrd") {
+              Get.to(() => const HrdCutiView());
+            } else {
               Get.to(() => ListCutiView(), binding: ListCutiBinding());
-            }),
+            }
+          }),
+
           ),
           Expanded(
             child: _buildMenuButton(Icons.request_page, "Reimbursement",

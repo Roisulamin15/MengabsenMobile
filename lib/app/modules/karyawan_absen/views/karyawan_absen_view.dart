@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_mengabsen/app/widgets/absen_lokasi_selector.dart';
+import 'package:flutter_application_mengabsen/app/modules/widgets/absen_lokasi_selector.dart';
 import 'package:get/get.dart';
 import '../controllers/karyawan_absen_controller.dart';
-import 'absen_lokasi_selector.dart';
+
 
 class KaryawanAbsenView extends GetView<KaryawanAbsenController> {
   const KaryawanAbsenView({super.key});

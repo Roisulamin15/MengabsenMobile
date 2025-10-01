@@ -45,7 +45,7 @@ class ProfilView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Halo, ${controller.nama.value}",
+                              "Halo, ${controller.username.value}",
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,

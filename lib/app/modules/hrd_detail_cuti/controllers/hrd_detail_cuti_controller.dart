@@ -2,24 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HrdDetailCutiController extends GetxController {
-  // contoh data dummy cuti, bisa diganti ambil dari API/DB
-  final cutiDetail = {
-    "nama": "Budi Santoso",
-    "nik": "123456",
-    "jabatan": "Staff IT",
-    "tanggal_mulai": "2025-09-20",
-    "tanggal_selesai": "2025-09-25",
-    "jumlah_hari": "5 Hari",
-    "alasan": "Pulang kampung"
-  }.obs;
-
-  // controller untuk textfield (kalau mau edit)
   final alasanC = TextEditingController();
+
+  // Data cuti yang dipilih
+  var cutiDetail = <String, dynamic>{}.obs;
 
   @override
   void onInit() {
     super.onInit();
-    alasanC.text = cutiDetail["alasan"] ?? "";
+  }
+
+  void setCutiDetail(Map<String, dynamic> data) {
+    cutiDetail.value = data;
+    alasanC.text = data["alasan"] ?? "";
   }
 
   void updateAlasan() {

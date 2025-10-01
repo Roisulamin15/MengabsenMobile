@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/controllers/karyawan_absen_controller.dart';
-import 'package:flutter_application_mengabsen/app/widgets/absen_lokasi_selector.dart';
 import 'package:get/get.dart';
-// widget selector lokasi
-import '../../widgets/absen_lokasi_selector.dart';
-// controller
-import '../karyawan_absen/controllers/karyawan_absen_controller.dart';
+import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/controllers/karyawan_absen_controller.dart';
+import 'package:flutter_application_mengabsen/app/modules/widgets/absen_lokasi_selector.dart';
 
 class KaryawanAbsenWfoWfhView extends StatelessWidget {
-  final String jenis; // WFO atau WFH
+  final String jenis; // "WFO" atau "WFH"
+
   const KaryawanAbsenWfoWfhView({super.key, required this.jenis});
 
   @override
   Widget build(BuildContext context) {
-    final KaryawanAbsenController controller = Get.put(KaryawanAbsenController());
+    final KaryawanAbsenController controller = Get.find<KaryawanAbsenController>();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Absensi"),
+        title: Text("Absensi $jenis"),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -25,7 +22,7 @@ class KaryawanAbsenWfoWfhView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🔹 Tab Absensi / Riwayat Absensi
+            // 🔹 Tab Absensi / Riwayat
             Container(
               decoration: BoxDecoration(
                 color: Colors.grey[200],
@@ -45,13 +42,8 @@ class KaryawanAbsenWfoWfhView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: const Center(
-                        child: Text("Riwayat Absensi"),
-                      ),
-                    ),
+                  const Expanded(
+                    child: Center(child: Text("Riwayat Absensi")),
                   ),
                 ],
               ),
@@ -64,9 +56,8 @@ class KaryawanAbsenWfoWfhView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // 🔹 Panggil widget AbsenLokasiSelector (radio WFO/WFH/WFA/Tidak Masuk)
+            // 🔹 Selector Lokasi
             AbsenLokasiSelector(),
-
             const SizedBox(height: 16),
 
             // 🔹 Dropdown Lokasi
@@ -125,7 +116,7 @@ class KaryawanAbsenWfoWfhView extends StatelessWidget {
             // 🔹 Tombol Absen
             ElevatedButton(
               onPressed: () {
-                debugPrint("Pilihan Lokasi: ${controller.selectedOption.value}");
+                debugPrint("Jenis: $jenis | Pilihan Lokasi: ${controller.selectedOption.value}");
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,

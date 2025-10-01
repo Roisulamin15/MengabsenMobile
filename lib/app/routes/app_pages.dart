@@ -60,7 +60,7 @@ part 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.KARYAWAN_ABSEN;
+  static const INITIAL = Routes.HALAMAN_LOGIN;
 
   static final routes = [
     GetPage(
@@ -179,7 +179,7 @@ class AppPages {
       binding: SuratTugasDetailBinding(),
     ),
     GetPage(
-      name: _Paths.HRD_CUTI,
+      name: '/hrd-cuti',
       page: () => const HrdCutiView(),
       binding: HrdCutiBinding(),
     ),

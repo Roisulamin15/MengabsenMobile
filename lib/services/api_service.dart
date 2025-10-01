@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = "https://incredible-art-production.up.railway.app/api";
+  static const String baseUrl = "https://cmsweb-production.up.railway.app/api";
+
 
   static Future<Map<String, dynamic>> login(String email, String password) async {
-    final url = Uri.parse('$baseUrl/login');
+    final url = Uri.parse('$baseUrl/auth/login');
     print("🔗 [LOGIN] URL: $url");
     print("📩 [LOGIN] Sending => { email: $email, password: $password }");
 
