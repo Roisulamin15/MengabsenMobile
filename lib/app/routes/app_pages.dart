@@ -8,8 +8,11 @@ import '../modules/cuti/bindings/cuti_binding.dart';
 import '../modules/cuti/views/cuti_view.dart';
 import '../modules/detail_cuti/bindings/detail_cuti_binding.dart';
 import '../modules/detail_cuti/views/detail_cuti_view.dart';
+import '../modules/detail_lembur/bindings/detail_lembur_binding.dart';
+import '../modules/detail_lembur/views/detail_lembur_view.dart';
 import '../modules/edit_profil/bindings/edit_profil_binding.dart';
 import '../modules/edit_profil/views/edit_profil_view.dart';
+import '../modules/form_lembur/bindings/form_lembur_binding.dart';
 import '../modules/ganti_password/bindings/ganti_password_binding.dart';
 import '../modules/ganti_password/views/ganti_password_view.dart';
 import '../modules/halaman_login/bindings/halaman_login_binding.dart';
@@ -24,6 +27,8 @@ import '../modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
 import '../modules/karyawan_absen/views/karyawan_absen_view.dart';
 import '../modules/karyawan_absen_wfo_wfh/bindings/karyawan_absen_wfo_wfh_binding.dart';
 import '../modules/karyawan_absen_wfo_wfh/views/karyawan_absen_wfo_wfh_view.dart';
+import '../modules/lembur/bindings/lembur_binding.dart';
+import '../modules/lembur/views/lembur_view.dart';
 import '../modules/list_cuti/bindings/list_cuti_binding.dart';
 import '../modules/list_cuti/views/list_cuti_view.dart';
 import '../modules/login_email/bindings/login_email_binding.dart';
@@ -54,13 +59,16 @@ import '../modules/ubah_password/bindings/ubah_password_binding.dart';
 import '../modules/ubah_password/views/ubah_password_view.dart';
 import '../modules/verifikasi_email/bindings/verifikasi_email_binding.dart';
 import '../modules/verifikasi_email/views/verifikasi_email_view.dart';
+import '../modules/form_lembur/views/form_lembur_view.dart';
+
+
 
 part 'app_routes.dart';
 
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.HALAMAN_LOGIN;
+  static const INITIAL = Routes.HOME;
 
   static final routes = [
     GetPage(
@@ -201,6 +209,20 @@ class AppPages {
       },
       binding: KaryawanAbsenWfoWfhBinding(),
     ),
-
+    GetPage(
+      name: _Paths.LEMBUR,
+      page: () => const LemburView(),
+      binding: LemburBinding(),
+    ),
+    GetPage(
+      name: _Paths.FORM_LEMBUR,
+      page: () =>  LemburFormView(),
+      binding: FormLemburBinding(),
+    ),
+    GetPage(
+      name: _Paths.DETAIL_LEMBUR,
+      page: () => const DetailLemburView(),
+      binding: DetailLemburBinding(),
+    ),
   ];
 }

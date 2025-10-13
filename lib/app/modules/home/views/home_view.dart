@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_mengabsen/app/modules/hrd_cuti/views/hrd_cuti_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/views/karyawan_absen_view.dart';
+import 'package:flutter_application_mengabsen/app/modules/lembur/bindings/lembur_binding.dart';
+import 'package:flutter_application_mengabsen/app/modules/lembur/views/lembur_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/surat_tugas/bindings/surat_tugas_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/surat_tugas/views/surat_tugas_view.dart';
 import 'package:get/get.dart';
@@ -102,12 +104,12 @@ class _HomeViewState extends State<HomeView> {
       bottomNavigationBar: _buildBottomNavigation(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-      backgroundColor: Colors.orange,
-      child: const Icon(Icons.camera_alt),
-      onPressed: () {
-        Get.to(() => const KaryawanAbsenView(), binding: KaryawanAbsenBinding());
-      },
-    ),
+        backgroundColor: Colors.orange,
+        child: const Icon(Icons.camera_alt),
+        onPressed: () {
+          Get.to(() => const KaryawanAbsenView(), binding: KaryawanAbsenBinding());
+        },
+      ),
     );
   }
 
@@ -139,7 +141,7 @@ class _HomeViewState extends State<HomeView> {
         children: [
           const CircleAvatar(
             radius: 30,
-            backgroundImage: AssetImage("assets/"),
+            backgroundImage: AssetImage("assets/profile_default.png"),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -164,6 +166,7 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
+  // 🔸 MENU SECTION (now with Lembur)
   Widget _buildMenuSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -172,31 +175,32 @@ class _HomeViewState extends State<HomeView> {
         children: [
           Expanded(
             child: _buildMenuButton(Icons.event, "Cuti", Colors.orange, () {
-            final role = controller.role.value.toLowerCase();
-
-            if (role == "hrd") {
-              Get.to(() => const HrdCutiView());
-            } else {
-              Get.to(() => ListCutiView(), binding: ListCutiBinding());
-            }
-          }),
-
-          ),
-          Expanded(
-            child: _buildMenuButton(Icons.request_page, "Reimbursement",
-                Colors.orange, () {
-              Get.to(() => const ReimbursementView(),
-                  binding: ReimbursementBinding());
+              final role = controller.role.value.toLowerCase();
+              if (role == "hrd") {
+                Get.to(() => const HrdCutiView());
+              } else {
+                Get.to(() => ListCutiView(), binding: ListCutiBinding());
+              }
             }),
           ),
           Expanded(
-              child: _buildMenuButton(
-                  Icons.assignment, "Surat Tugas", Colors.orange, () {
-                    Get.to(() => SuratTugasView(), binding: SuratTugasBinding());
-                  })),
+            child: _buildMenuButton(Icons.request_page, "Reimbursement", Colors.orange, () {
+              Get.to(() => const ReimbursementView(), binding: ReimbursementBinding());
+            }),
+          ),
           Expanded(
-              child: _buildMenuButton(
-                  Icons.receipt_long, "Slip Gaji", Colors.orange, () {})),
+            child: _buildMenuButton(Icons.assignment, "Surat Tugas", Colors.orange, () {
+              Get.to(() => SuratTugasView(), binding: SuratTugasBinding());
+            }),
+          ),
+          Expanded(
+            child: _buildMenuButton(Icons.receipt_long, "Slip Gaji", Colors.orange, () {}),
+          ),
+          Expanded(
+            child: _buildMenuButton(Icons.access_time, "Lembur", Colors.orange, () {
+              Get.to(() => LemburView(), binding: LemburBinding());
+            }),
+          ),
         ],
       ),
     );

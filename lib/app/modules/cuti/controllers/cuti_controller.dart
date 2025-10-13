@@ -30,6 +30,8 @@ class CutiController extends GetxController {
     "Lead of Mobile Developer",
     "Lead of UI/UX Designer",
     "Backend and Middleware Developer",
+    "System Analyst"
+    "Frontend Developer",
     "Mobile Developer",
     "UI/UX Designer",
     "QA and IT Support",
