@@ -13,6 +13,7 @@ import '../modules/detail_lembur/views/detail_lembur_view.dart';
 import '../modules/edit_profil/bindings/edit_profil_binding.dart';
 import '../modules/edit_profil/views/edit_profil_view.dart';
 import '../modules/form_lembur/bindings/form_lembur_binding.dart';
+import '../modules/form_lembur/views/form_lembur_view.dart';
 import '../modules/ganti_password/bindings/ganti_password_binding.dart';
 import '../modules/ganti_password/views/ganti_password_view.dart';
 import '../modules/halaman_login/bindings/halaman_login_binding.dart';
@@ -25,6 +26,8 @@ import '../modules/hrd_detail_cuti/bindings/hrd_detail_cuti_binding.dart';
 import '../modules/hrd_detail_cuti/views/hrd_detail_cuti_view.dart';
 import '../modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
 import '../modules/karyawan_absen/views/karyawan_absen_view.dart';
+import '../modules/karyawan_absen_wfa/bindings/karyawan_absen_wfa_binding.dart';
+import '../modules/karyawan_absen_wfa/views/karyawan_absen_wfa_view.dart';
 import '../modules/karyawan_absen_wfo_wfh/bindings/karyawan_absen_wfo_wfh_binding.dart';
 import '../modules/karyawan_absen_wfo_wfh/views/karyawan_absen_wfo_wfh_view.dart';
 import '../modules/lembur/bindings/lembur_binding.dart';
@@ -49,6 +52,8 @@ import '../modules/reimbursement_form/bindings/reimbursement_form_binding.dart';
 import '../modules/reimbursement_form/views/reimbursement_form_view.dart';
 import '../modules/reimbursement_type/bindings/reimbursement_type_binding.dart';
 import '../modules/reimbursement_type/views/reimbursement_type_view.dart';
+import '../modules/riwayat_absen/bindings/riwayat_absen_binding.dart';
+import '../modules/riwayat_absen/views/riwayat_absen_view.dart';
 import '../modules/surat_tugas/bindings/surat_tugas_binding.dart';
 import '../modules/surat_tugas/views/surat_tugas_view.dart';
 import '../modules/surat_tugas_detail/bindings/surat_tugas_detail_binding.dart';
@@ -59,9 +64,6 @@ import '../modules/ubah_password/bindings/ubah_password_binding.dart';
 import '../modules/ubah_password/views/ubah_password_view.dart';
 import '../modules/verifikasi_email/bindings/verifikasi_email_binding.dart';
 import '../modules/verifikasi_email/views/verifikasi_email_view.dart';
-import '../modules/form_lembur/views/form_lembur_view.dart';
-
-
 
 part 'app_routes.dart';
 
@@ -216,13 +218,28 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.FORM_LEMBUR,
-      page: () =>  LemburFormView(),
+      page: () => LemburFormView(),
       binding: FormLemburBinding(),
     ),
     GetPage(
       name: _Paths.DETAIL_LEMBUR,
       page: () => const DetailLemburView(),
       binding: DetailLemburBinding(),
+    ),
+    GetPage(
+      name: _Paths.KARYAWAN_ABSEN_WFA,
+      page: () => const KaryawanAbsenWfaView(),
+      binding: KaryawanAbsenBinding(), // pakai controller yang sama
+    ),
+    GetPage(
+      name: _Paths.RIWAYAT_ABSEN,
+      page: () => const RiwayatAbsenView(),
+      binding: RiwayatAbsenBinding(),
+    ),
+   GetPage(
+      name: _Paths.RIWAYAT_ABSEN,
+      page: () => const RiwayatAbsenView(),
+      binding: RiwayatAbsenBinding(),
     ),
   ];
 }

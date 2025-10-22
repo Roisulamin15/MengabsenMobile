@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/controllers/karyawan_absen_controller.dart';
-import 'package:flutter_application_mengabsen/app/modules/widgets/absen_lokasi_selector.dart';
+import '../controllers/karyawan_absen_wfa_controller.dart';
+import '../../widgets/absen_lokasi_selector.dart';
 
-class KaryawanAbsenWfoWfhView extends StatelessWidget {
-  final String jenis; // "WFO" atau "WFH" atau "WFA"
-
-  const KaryawanAbsenWfoWfhView({super.key, required this.jenis});
+class KaryawanAbsenWfaView extends GetView<KaryawanAbsenWfaController> {
+  const KaryawanAbsenWfaView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final KaryawanAbsenController controller = Get.find<KaryawanAbsenController>();
-
     return Scaffold(
       appBar: AppBar(
-        title: Text("Absensi $jenis"),
+        title: const Text("Absensi WFA"),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -30,7 +26,7 @@ class KaryawanAbsenWfoWfhView extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // Tab Absen aktif
+                  // Tab Absensi aktif
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -41,7 +37,10 @@ class KaryawanAbsenWfoWfhView extends StatelessWidget {
                       child: const Center(
                         child: Text(
                           "Absensi",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -51,15 +50,17 @@ class KaryawanAbsenWfoWfhView extends StatelessWidget {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        // Kirim jenis ke halaman Riwayat
-                        Get.toNamed('/riwayat-absen', arguments: jenis);
+                        Get.toNamed('/riwayat-absen', arguments: 'WFA');
                       },
                       child: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
                         child: Center(
                           child: Text(
                             "Riwayat Absensi",
-                            style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -71,31 +72,15 @@ class KaryawanAbsenWfoWfhView extends StatelessWidget {
 
             const SizedBox(height: 20),
 
+            // 🔹 Pengingat
             const Text(
               "Jangan sampe lupa isi absensi nya ya 👇",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
 
-            // 🔹 Selector Lokasi
+            // 🔹 Lokasi Absen
             AbsenLokasiSelector(),
-            const SizedBox(height: 16),
-
-            // 🔹 Dropdown Lokasi
-            DropdownButtonFormField<String>(
-              value: "Alamat Rumah",
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.location_on, color: Colors.red),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              items: const [
-                DropdownMenuItem(value: "Alamat Rumah", child: Text("Alamat Rumah")),
-                DropdownMenuItem(value: "Kantor", child: Text("Kantor")),
-              ],
-              onChanged: (value) {},
-            ),
             const SizedBox(height: 16),
 
             // 🔹 Map Placeholder
@@ -105,12 +90,17 @@ class KaryawanAbsenWfoWfhView extends StatelessWidget {
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Center(child: Icon(Icons.map, size: 80, color: Colors.grey)),
+              child: const Center(
+                child: Icon(Icons.map, size: 80, color: Colors.grey),
+              ),
             ),
             const SizedBox(height: 16),
 
             // 🔹 Foto Selfie
-            const Text("Foto Selfie Anda"),
+            const Text(
+              "Foto Selfie Anda",
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 8),
             Container(
               height: 150,
@@ -118,9 +108,13 @@ class KaryawanAbsenWfoWfhView extends StatelessWidget {
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Center(child: Icon(Icons.image, size: 50, color: Colors.grey)),
+              child: const Center(
+                child: Icon(Icons.image, size: 50, color: Colors.grey),
+              ),
             ),
             const SizedBox(height: 12),
+
+            // 🔹 Tombol Ambil Foto
             ElevatedButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.camera_alt),
@@ -129,21 +123,23 @@ class KaryawanAbsenWfoWfhView extends StatelessWidget {
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(45),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
             const SizedBox(height: 12),
 
             // 🔹 Tombol Absen
             ElevatedButton(
-              onPressed: () {
-                debugPrint("Jenis: $jenis | Pilihan Lokasi: ${controller.selectedOption.value}");
-              },
+              onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(45),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: const Text("Absen"),
             ),

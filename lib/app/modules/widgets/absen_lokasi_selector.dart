@@ -3,7 +3,6 @@ import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/control
 import 'package:flutter_application_mengabsen/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 
-
 class AbsenLokasiSelector extends StatelessWidget {
   final KaryawanAbsenController controller = Get.find<KaryawanAbsenController>();
 
@@ -13,13 +12,15 @@ class AbsenLokasiSelector extends StatelessWidget {
     controller.selectedOption.value = value;
 
     if (value == "WFO" || value == "WFH") {
-      // pindah ke halaman WFO/WFH
+      // Pindah ke halaman WFO/WFH
       Get.toNamed(Routes.KARYAWAN_ABSEN_WFO_WFH, arguments: value);
+    } else if (value == "WFA") {
+      // Pindah ke halaman WFA
+      Get.toNamed(Routes.KARYAWAN_ABSEN_WFA);
     } else if (value == "Tidak Masuk Kerja") {
-      // balik ke halaman KaryawanAbsen
+      // Balik ke halaman utama absensi
       Get.toNamed(Routes.KARYAWAN_ABSEN);
     }
-    // kalau WFA biarin di halaman sekarang
   }
 
   @override
@@ -46,8 +47,7 @@ class AbsenLokasiSelector extends StatelessWidget {
               Radio(
                 value: "WFA",
                 groupValue: controller.selectedOption.value,
-                onChanged: (value) =>
-                    controller.selectedOption.value = value!,
+                onChanged: (value) => _handleSelection(value!),
               ),
               const Text("WFA"),
             ],
