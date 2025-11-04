@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_mengabsen/app/modules/cuti/controllers/cuti_controller.dart';
 import 'package:flutter_application_mengabsen/app/modules/cuti/views/cuti_view.dart';
+
 import 'package:get/get.dart';
+
 
 class ListCutiView extends StatelessWidget {
   ListCutiView({super.key});
 
   final CutiController listC = Get.put(CutiController(), permanent: true);
 
-  // Warna status
   Color _getStatusColor(String status) {
     switch (status) {
       case "Disetujui":
@@ -24,10 +25,7 @@ class ListCutiView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Cuti",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: const Text("Cuti", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: Column(
@@ -45,6 +43,10 @@ class ListCutiView extends StatelessWidget {
           ),
           Expanded(
             child: Obx(() {
+              if (listC.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
               final data = listC.cutiList;
               if (data.isEmpty) {
                 return const Center(
@@ -54,11 +56,14 @@ class ListCutiView extends StatelessWidget {
                   ),
                 );
               }
+
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: data.length,
                 itemBuilder: (context, index) {
                   final item = data[index];
+                  String status = (item['status'] ?? '').toString();
+
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
                     shape: RoundedRectangleBorder(
@@ -66,13 +71,10 @@ class ListCutiView extends StatelessWidget {
                     ),
                     elevation: 2,
                     child: ListTile(
-                      onTap: () {
-                        // Navigasi ke halaman detail dengan mengirimkan data lengkap
-                        Get.toNamed('/detail-cuti', arguments: item);
-                      },
+                      onTap: () {},
                       leading: const Icon(Icons.description, color: Colors.orange),
                       title: Text(
-                        item['jenis'] ?? '-', // ✅ Sesuai dengan CutiController
+                        item['jenis_izin'] ?? '-',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Column(
@@ -80,9 +82,9 @@ class ListCutiView extends StatelessWidget {
                         children: [
                           const SizedBox(height: 4),
                           Text(
-                            item['status'] ?? '-',
+                            status,
                             style: TextStyle(
-                              color: _getStatusColor(item['status'] ?? ""),
+                              color: _getStatusColor(status),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -93,7 +95,8 @@ class ListCutiView extends StatelessWidget {
                           ),
                         ],
                       ),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                      trailing: const Icon(Icons.arrow_forward_ios,
+                          size: 16, color: Colors.grey),
                     ),
                   );
                 },
@@ -108,15 +111,11 @@ class ListCutiView extends StatelessWidget {
                 backgroundColor: Colors.orange,
                 minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                    borderRadius: BorderRadius.circular(8)),
               ),
               child: const Text(
                 "Ajukan Cuti",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
           ),

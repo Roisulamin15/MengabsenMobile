@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:flutter_application_mengabsen/services/api_service.dart';
 
 class HrdCutiController extends GetxController {
   var cutiList = <Map<String, dynamic>>[].obs;
+  var isLoading = false.obs;
+
+  final box = GetStorage();
 
   @override
   void onInit() {
@@ -10,48 +15,58 @@ class HrdCutiController extends GetxController {
     fetchData();
   }
 
-  // Simulasi ambil API
-  void fetchData() {
-    cutiList.assignAll([
-      {
-        "nama": "Taufik Nur Abadi",
-        "status": "Belum Review",
-        "tanggal": "19/05/2022",
-        "jabatan": "Staff IT",
-        "nik": "1234567890",
-        "jenis": "Cuti",
-        "alasan": "Acara Keluarga",
-        "lampiran": "PengajuanCutiTaufik07082024.pdf",
-      },
-      {
-        "nama": "Raditya Banu",
-        "status": "DISETUJUI PIC",
-        "tanggal": "19/05/2022",
-        "jabatan": "Karyawan",
-        "nik": "987654321",
-        "jenis": "Izin",
-        "alasan": "Urusan Pribadi",
-        "lampiran": "PengajuanCutiRadit08082024.pdf",
-      },
-      {
-        "nama": "Fredrik Oswald",
-        "status": "DITOLAK PIC",
-        "tanggal": "19/05/2022",
-        "jabatan": "Staff",
-        "nik": "5566778899",
-        "jenis": "Sakit",
-        "alasan": "Demam Tinggi",
-        "lampiran": "PengajuanCutiFredrik09082024.pdf",
-      },
-    ]);
+  /// 🔹 Ambil data cuti dari backend
+  Future<void> fetchData() async {
+    isLoading.value = true;
+    final token = box.read('token') ?? '';
+
+    try {
+      final response = await ApiService.getOutdays(token);
+      cutiList.value = List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      print("❌ Gagal ambil data cuti: $e");
+      Get.snackbar("Gagal", "Tidak bisa memuat data cuti",
+          backgroundColor: Colors.red, colorText: Colors.white);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  /// Tambah data cuti baru (misal dari form CutiView)
-  void tambahCuti(Map<String, dynamic> data) {
-    cutiList.add(data);
+  /// 🔹 Approve cuti
+  Future<void> approveCuti(int id, BuildContext context) async {
+    final token = box.read('token') ?? '';
+    try {
+      final response = await ApiService.approveCuti(id, token);
+      await fetchData();
+
+      showKonfirmasi(context, true);
+      Get.snackbar("Berhasil", response['message'] ?? "Cuti disetujui",
+          backgroundColor: Colors.green, colorText: Colors.white);
+    } catch (e) {
+      print("❌ Gagal approve: $e");
+      Get.snackbar("Gagal", "Tidak dapat menyetujui cuti",
+          backgroundColor: Colors.red, colorText: Colors.white);
+    }
   }
 
-  /// Dialog konfirmasi
+  /// 🔹 Reject cuti
+  Future<void> rejectCuti(int id, BuildContext context) async {
+    final token = box.read('token') ?? '';
+    try {
+      final response = await ApiService.rejectCuti(id, token);
+      await fetchData();
+
+      showKonfirmasi(context, false);
+      Get.snackbar("Ditolak", response['message'] ?? "Cuti ditolak",
+          backgroundColor: Colors.orange, colorText: Colors.white);
+    } catch (e) {
+      print("❌ Gagal reject: $e");
+      Get.snackbar("Gagal", "Tidak dapat menolak cuti",
+          backgroundColor: Colors.red, colorText: Colors.white);
+    }
+  }
+
+  /// 🔹 Dialog konfirmasi
   void showKonfirmasi(BuildContext context, bool disetujui) {
     showDialog(
       context: context,
@@ -81,15 +96,15 @@ class HrdCutiController extends GetxController {
               ),
               const SizedBox(height: 20),
               Icon(
-                disetujui ? Icons.check_circle : Icons.error,
+                disetujui ? Icons.check_circle : Icons.cancel,
                 color: disetujui ? Colors.green : Colors.red,
                 size: 60,
               ),
               const SizedBox(height: 10),
               Text(
                 disetujui
-                    ? "Permintaan cuti telah disetujui.\nNotifikasi akan dikirim kepada staff."
-                    : "Permintaan cuti ditolak karena alasan tertentu.\nNotifikasi akan dikirim kepada staff.",
+                    ? "Permintaan cuti telah disetujui."
+                    : "Permintaan cuti ditolak.",
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 14),
               ),

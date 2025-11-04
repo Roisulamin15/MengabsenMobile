@@ -37,7 +37,8 @@ class ProfilView extends StatelessWidget {
                 children: [
                   const CircleAvatar(
                     radius: 30,
-                    backgroundImage: AssetImage("assets/"),
+                    backgroundColor: Color.fromARGB(249, 183, 181, 181),
+                    child: Icon(Icons.person, color: Colors.white, size: 35),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

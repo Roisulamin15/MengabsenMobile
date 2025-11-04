@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mengabsen/app/modules/edit_profil/controllers/edit_profil_controller.dart';
+import 'package:flutter_application_mengabsen/app/modules/edit_profil/views/edit_profil_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/hrd_cuti/views/hrd_cuti_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/views/karyawan_absen_view.dart';
@@ -8,6 +10,7 @@ import 'package:flutter_application_mengabsen/app/modules/lembur/views/lembur_vi
 import 'package:flutter_application_mengabsen/app/modules/surat_tugas/bindings/surat_tugas_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/surat_tugas/views/surat_tugas_view.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import '../controllers/home_controller.dart';
 import 'package:flutter_application_mengabsen/app/modules/list_cuti/views/list_cuti_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/list_cuti/bindings/list_cuti_binding.dart';
@@ -24,10 +27,10 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final HomeController controller = Get.put(HomeController(), permanent: true);
-
   final PageController _pageController = PageController();
   int _currentPage = 0;
   Timer? _sliderTimer;
+  final box = GetStorage();
 
   final List<String> _bannerImages = [
     "assets/banner1.png",
@@ -38,8 +41,33 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _showBannerPopup());
+    _initializePopups();
     _startAutoSlide();
+  }
+
+  Future<void> _initializePopups() async {
+    await GetStorage.init();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _showBannerPopup();
+
+      // 🔹 Ambil data profil dari penyimpanan
+      String? nama = box.read('nama');
+      String? email = box.read('email');
+      String? nik = box.read('nik');
+
+      // 🔹 Cek kelengkapan profil
+      bool profilLengkap = nama != null &&
+          nama.isNotEmpty &&
+          email != null &&
+          email.isNotEmpty &&
+          nik != null &&
+          nik.isNotEmpty;
+
+      // 🔹 Jika profil belum lengkap, tampilkan popup
+      if (!profilLengkap) {
+        _showProfilPopup();
+      }
+    });
   }
 
   @override
@@ -64,19 +92,20 @@ class _HomeViewState extends State<HomeView> {
     });
   }
 
-  void _showBannerPopup() {
-    showDialog(
+  // 🔶 Popup Banner
+  Future<void> _showBannerPopup() async {
+    return showDialog(
       context: context,
       barrierDismissible: true,
       builder: (context) {
         return Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              "assets/banner1.png",
-              fit: BoxFit.cover,
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset("assets/banner1.png", fit: BoxFit.cover),
             ),
           ),
         );
@@ -84,6 +113,80 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
+  // 🟢 Popup "Lengkapi Profil Anda"
+  void _showProfilPopup() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "Lengkapi Profil Anda",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Icon(Icons.check_circle, color: Colors.green, size: 70),
+                const SizedBox(height: 16),
+                const Text(
+                  "Silakan lengkapi profil Anda terlebih dahulu\nuntuk melanjutkan.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Get.lazyPut(() => EditProfilController());
+                      Get.to(() => EditProfilView());
+                    },
+                    child: const Text(
+                      "OK",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // 🔻 UI utama
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,7 +210,8 @@ class _HomeViewState extends State<HomeView> {
         backgroundColor: Colors.orange,
         child: const Icon(Icons.camera_alt),
         onPressed: () {
-          Get.to(() => const KaryawanAbsenView(), binding: KaryawanAbsenBinding());
+          Get.to(() => const KaryawanAbsenView(),
+              binding: KaryawanAbsenBinding());
         },
       ),
     );
@@ -141,7 +245,8 @@ class _HomeViewState extends State<HomeView> {
         children: [
           const CircleAvatar(
             radius: 30,
-            backgroundImage: AssetImage("assets/profile_default.png"),
+            backgroundColor: Color.fromARGB(249, 183, 181, 181),
+            child: Icon(Icons.person, color: Colors.white, size: 35),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -150,12 +255,14 @@ class _HomeViewState extends State<HomeView> {
                   children: [
                     Text(
                       "Halo, ${controller.username.value}",
-                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      style:
+                          const TextStyle(color: Colors.white, fontSize: 18),
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       controller.role.value,
-                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 14),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
@@ -166,7 +273,6 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  // 🔸 MENU SECTION (now with Lembur)
   Widget _buildMenuSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -174,9 +280,10 @@ class _HomeViewState extends State<HomeView> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            child: _buildMenuButton(Icons.event, "Cuti", Colors.orange, () {
+            child:
+                _buildMenuButton(Icons.event, "Cuti", Colors.orange, () {
               final role = controller.role.value.toLowerCase();
-              if (role == "hrd") {
+              if (role == "hrd" || role == "pic") {
                 Get.to(() => const HrdCutiView());
               } else {
                 Get.to(() => ListCutiView(), binding: ListCutiBinding());
@@ -184,20 +291,25 @@ class _HomeViewState extends State<HomeView> {
             }),
           ),
           Expanded(
-            child: _buildMenuButton(Icons.request_page, "Reimbursement", Colors.orange, () {
-              Get.to(() => const ReimbursementView(), binding: ReimbursementBinding());
+            child: _buildMenuButton(
+                Icons.request_page, "Reimbursement", Colors.orange, () {
+              Get.to(() => const ReimbursementView(),
+                  binding: ReimbursementBinding());
             }),
           ),
           Expanded(
-            child: _buildMenuButton(Icons.assignment, "Surat Tugas", Colors.orange, () {
+            child: _buildMenuButton(
+                Icons.assignment, "Surat Tugas", Colors.orange, () {
               Get.to(() => SuratTugasView(), binding: SuratTugasBinding());
             }),
           ),
           Expanded(
-            child: _buildMenuButton(Icons.receipt_long, "Slip Gaji", Colors.orange, () {}),
+            child: _buildMenuButton(
+                Icons.receipt_long, "Slip Gaji", Colors.orange, () {}),
           ),
           Expanded(
-            child: _buildMenuButton(Icons.access_time, "Lembur", Colors.orange, () {
+            child: _buildMenuButton(Icons.access_time, "Lembur",
+                Colors.orange, () {
               Get.to(() => LemburView(), binding: LemburBinding());
             }),
           ),
@@ -237,18 +349,21 @@ class _HomeViewState extends State<HomeView> {
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 title,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
             ...data.map((item) => Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: ListTile(
                     title: Text(item["jam"]!),
                     subtitle: Text(item["tanggal"]!),
                     trailing: Text(
                       item["status"]!,
                       style: const TextStyle(
-                          color: Colors.green, fontWeight: FontWeight.bold),
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 )),
@@ -294,9 +409,8 @@ class _HomeViewState extends State<HomeView> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           IconButton(
-            icon: const Icon(Icons.home, color: Colors.orange),
-            onPressed: () {},
-          ),
+              icon: const Icon(Icons.home, color: Colors.orange),
+              onPressed: () {}),
           const SizedBox(width: 48),
           IconButton(
             icon: const Icon(Icons.person, color: Colors.orange),

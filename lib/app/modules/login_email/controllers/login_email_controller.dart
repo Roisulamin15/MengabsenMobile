@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mengabsen/app/modules/home/controllers/home_controller.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-
 import 'package:flutter_application_mengabsen/services/api_service.dart';
-
-// import view utama
 import '../../home/views/home_view.dart';
 
 class LoginEmailController extends GetxController {
@@ -15,7 +13,6 @@ class LoginEmailController extends GetxController {
 
   final storage = GetStorage();
 
-  /// Helper untuk menampilkan snackbar error aman dari overflow
   void showErrorSnackbar(String title, String message) {
     Get.snackbar(
       title,
@@ -23,10 +20,7 @@ class LoginEmailController extends GetxController {
       messageText: SizedBox(
         height: 80,
         child: SingleChildScrollView(
-          child: Text(
-            message,
-            style: const TextStyle(color: Colors.white),
-          ),
+          child: Text(message, style: const TextStyle(color: Colors.white)),
         ),
       ),
       snackPosition: SnackPosition.BOTTOM,
@@ -36,8 +30,8 @@ class LoginEmailController extends GetxController {
   }
 
   Future<void> login() async {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       showErrorSnackbar("Error", "Email dan password wajib diisi");
@@ -52,34 +46,36 @@ class LoginEmailController extends GetxController {
         return;
       }
 
-      // 🔹 Sesuaikan dengan response JSON dari backend
       if (data.containsKey('token') && data.containsKey('user')) {
-  token.value = data['token'] ?? "";
+        token.value = data['token'] ?? "";
 
-  final user = data['user'] as Map<String, dynamic>? ?? {};
-  final username = user['username'] ?? "Pengguna";
-  final emailUser = user['email'] ?? email;
-  final role = (user['role'] ?? "karyawan").toString().toLowerCase();
+        final user = data['user'] as Map<String, dynamic>? ?? {};
+        final username = user['username'] ?? "Pengguna";
+        final emailUser = user['email'] ?? email;
+        final role = (user['role'] ?? "karyawan").toString().toLowerCase();
+        final karyawanId = user['id']; // 🔹 ambil ID user dari API
 
-  // Simpan data user ke GetStorage
-  storage.write("username", username);
-  storage.write("email", emailUser);
-  storage.write("role", role);
-  storage.write("token", token.value);
+        // ✅ Simpan semua ke GetStorage
+        storage.write("username", username);
+        storage.write("email", emailUser);
+        storage.write("role", role);
+        storage.write("token", token.value);
+        storage.write("karyawan_id", karyawanId); // 🔹 tambahkan ini!
 
-  print("Username disimpan: $username");
-  print("Email disimpan: $emailUser");
-  print("Role disimpan: $role");
+        print("✅ Username disimpan: $username");
+        print("✅ Email disimpan: $emailUser");
+        print("✅ Role disimpan: $role");
+        print("✅ Karyawan ID disimpan: $karyawanId");
 
-  // 🔹 Setelah login masuk ke Home
-  Get.offAll(() => const HomeView());
-} else {
-  showErrorSnackbar("Login Gagal", data['message'] ?? "Terjadi kesalahan");
-}
-
+        // Masuk ke Home
+        Get.offAll(() => const HomeView());
+      } else {
+        showErrorSnackbar(
+            "Login Gagal", data['message'] ?? "Terjadi kesalahan");
+      }
     } catch (e) {
       print("❌ Error login: $e");
-      showErrorSnackbar("Error", "Gagal konek: $e");
+      showErrorSnackbar("Error", "Gagal konek ke server: $e");
     }
   }
 }

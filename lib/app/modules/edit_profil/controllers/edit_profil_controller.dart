@@ -3,35 +3,33 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
 import '../../home/controllers/home_controller.dart';
 
 class EditProfilController extends GetxController {
   final storage = GetStorage();
-  final picker = ImagePicker();
 
-  // Text controllers
+  // Controller input
   final namaController = TextEditingController();
-  final hpController = TextEditingController();
   final emailController = TextEditingController();
-  final tglLahirController = TextEditingController();
+  final hpController = TextEditingController();
   final ktpController = TextEditingController();
   final pasporController = TextEditingController();
   final alamatController = TextEditingController();
+  final tglLahirController = TextEditingController();
 
-  // Dropdowns
+  // Dropdown
   var jenisKelamin = RxnString();
   var kelurahan = RxnString();
   var kecamatan = RxnString();
   var kota = RxnString();
   var provinsi = RxnString();
 
-  // User data
+  // Info user
   var username = "".obs;
   var role = "".obs;
   var fotoProfil = "".obs;
 
-  final baseUrl = "https://cmsweb-production.up.railway.app/api";
+  final baseUrl = "https://nonvaluable-gerardo-unstormed.ngrok-free.dev/api";
 
   @override
   void onInit() {
@@ -42,11 +40,12 @@ class EditProfilController extends GetxController {
 
   void _ambilDataDariStorage() {
     namaController.text = storage.read("nama_lengkap") ?? "";
+    emailController.text = storage.read("email") ?? "";
     hpController.text = storage.read("no_hp") ?? "";
-    tglLahirController.text = storage.read("tanggal_lahir") ?? "";
     ktpController.text = storage.read("nik") ?? "";
     pasporController.text = storage.read("no_passport") ?? "";
     alamatController.text = storage.read("alamat") ?? "";
+    tglLahirController.text = storage.read("tanggal_lahir") ?? "";
 
     jenisKelamin.value = storage.read("jenis_kelamin");
     kelurahan.value = storage.read("kelurahan");
@@ -76,6 +75,8 @@ class EditProfilController extends GetxController {
         final data = jsonDecode(response.body);
         final profile = data['profile'];
         if (profile != null) {
+          // tambahkan fallback email dari storage jika API tidak mengembalikan email
+          profile['email'] ??= storage.read("email");
           _isiDataKeController(profile);
           _simpanKeStorage(profile);
         }
@@ -88,12 +89,15 @@ class EditProfilController extends GetxController {
   }
 
   Future<void> simpanData() async {
-    Get.snackbar("Menyimpan...", "Mengirim data ke server...",
-        snackPosition: SnackPosition.BOTTOM);
+    Get.dialog(
+      const Center(child: CircularProgressIndicator(color: Color(0xFFFF8A00))),
+      barrierDismissible: false,
+    );
 
     try {
       final token = storage.read("token");
       if (token == null) {
+        Get.back();
         _showResultDialog(success: false, message: "Token tidak ditemukan. Silakan login ulang.");
         return;
       }
@@ -107,6 +111,7 @@ class EditProfilController extends GetxController {
       }
 
       addField("nama_lengkap", namaController.text);
+      addField("email", emailController.text);
       addField("no_hp", hpController.text);
       addField("jenis_kelamin", jenisKelamin.value);
       addField("nik", ktpController.text);
@@ -134,9 +139,13 @@ class EditProfilController extends GetxController {
         body: body,
       );
 
+      Get.back();
+
       if (response.statusCode == 200) {
         final res = jsonDecode(response.body);
-        final profile = res['profile'];
+        final profile = res['profile'] ?? {};
+        profile['email'] ??= emailController.text; // pastikan email ikut tersimpan
+
         _isiDataKeController(profile);
         _simpanKeStorage(profile);
 
@@ -154,6 +163,7 @@ class EditProfilController extends GetxController {
         _showResultDialog(success: false, message: msg);
       }
     } catch (e) {
+      Get.back();
       _showResultDialog(success: false, message: "Terjadi kesalahan, coba lagi nanti.");
     }
   }
@@ -168,7 +178,6 @@ class EditProfilController extends GetxController {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header warna
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -177,7 +186,7 @@ class EditProfilController extends GetxController {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  success ? "Data Berhasil Disimpan" : "Terjadi Kesalahan",
+                  success ? 'Data Berhasil Disimpan' : 'Terjadi Kesalahan',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.white,
@@ -187,21 +196,18 @@ class EditProfilController extends GetxController {
                 ),
               ),
               const SizedBox(height: 24),
-
               Icon(
                 success ? Icons.check_circle : Icons.error,
                 size: 80,
                 color: success ? Colors.green : Colors.red,
               ),
               const SizedBox(height: 20),
-
               Text(
                 message,
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 14, color: Colors.black54),
               ),
               const SizedBox(height: 24),
-
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -210,16 +216,15 @@ class EditProfilController extends GetxController {
                     Get.offNamed('/profil');
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: success
-                        ? const Color(0xFFFF8A00)
-                        : const Color(0xFFFF4D4D),
+                    backgroundColor:
+                        success ? const Color(0xFFFF8A00) : const Color(0xFFFF4D4D),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: const Text(
-                    "OK",
+                    'OK',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -244,6 +249,7 @@ class EditProfilController extends GetxController {
 
   void _isiDataKeController(Map profile) {
     namaController.text = profile['nama_lengkap'] ?? "";
+    emailController.text = profile['email'] ?? storage.read("email") ?? "";
     hpController.text = profile['no_hp'] ?? "";
     tglLahirController.text = profile['tanggal_lahir'] ?? "";
     jenisKelamin.value = profile['jenis_kelamin'] ?? "";
@@ -256,23 +262,15 @@ class EditProfilController extends GetxController {
     provinsi.value = profile['provinsi'] ?? "";
   }
 
-  Future<void> pilihFoto() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      fotoProfil.value = pickedFile.path;
-      storage.write("fotoProfil", pickedFile.path);
-    }
-  }
-
   @override
   void onClose() {
     namaController.dispose();
-    hpController.dispose();
     emailController.dispose();
-    tglLahirController.dispose();
+    hpController.dispose();
     ktpController.dispose();
     pasporController.dispose();
     alamatController.dispose();
+    tglLahirController.dispose();
     super.onClose();
   }
 }

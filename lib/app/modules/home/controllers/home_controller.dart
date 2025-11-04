@@ -18,7 +18,6 @@ class HomeController extends GetxController {
   }
 
   void ambilDataPengguna() {
-    // ambil data user hasil login
     username.value = storage.read("username") ?? "Pengguna";
     role.value = storage.read("role") ?? "Karyawan";
   }
