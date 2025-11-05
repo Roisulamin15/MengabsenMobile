@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_mengabsen/app/modules/cuti/controllers/cuti_controller.dart';
 import 'package:flutter_application_mengabsen/app/modules/cuti/views/cuti_view.dart';
-
+import 'package:flutter_application_mengabsen/app/modules/detail_cuti/views/detail_cuti_view.dart';
+import 'package:flutter_application_mengabsen/app/modules/list_cuti/controllers/list_cuti_controller.dart';
 import 'package:get/get.dart';
-
 
 class ListCutiView extends StatelessWidget {
   ListCutiView({super.key});
 
-  final CutiController listC = Get.put(CutiController(), permanent: true);
+  final ListCutiController listController = Get.find<ListCutiController>();
 
   Color _getStatusColor(String status) {
-    switch (status) {
-      case "Disetujui":
+    switch (status.toLowerCase()) {
+      case "disetujui":
         return Colors.green;
-      case "Ditolak":
+      case "ditolak":
         return Colors.red;
       default:
         return Colors.orange;
@@ -43,11 +42,7 @@ class ListCutiView extends StatelessWidget {
           ),
           Expanded(
             child: Obx(() {
-              if (listC.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              final data = listC.cutiList;
+              final data = listController.cutiList;
               if (data.isEmpty) {
                 return const Center(
                   child: Text(
@@ -62,7 +57,7 @@ class ListCutiView extends StatelessWidget {
                 itemCount: data.length,
                 itemBuilder: (context, index) {
                   final item = data[index];
-                  String status = (item['status'] ?? '').toString();
+                  String status = (item['status'] ?? 'Menunggu Persetujuan').toString();
 
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
@@ -71,7 +66,11 @@ class ListCutiView extends StatelessWidget {
                     ),
                     elevation: 2,
                     child: ListTile(
-                      onTap: () {},
+                      onTap: () {
+                        Get.to(
+                          () => DetailCutiView(),arguments: item,
+                        );
+                      },
                       leading: const Icon(Icons.description, color: Colors.orange),
                       title: Text(
                         item['jenis_izin'] ?? '-',

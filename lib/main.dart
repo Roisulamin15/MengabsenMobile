@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mengabsen/app/modules/cuti/controllers/cuti_controller.dart';
+import 'package:flutter_application_mengabsen/app/modules/list_cuti/controllers/list_cuti_controller.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'app/routes/app_pages.dart';
 
 Future<void> main() async {
-  // Pastikan binding Flutter sudah diinisialisasi sebelum menjalankan storage
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inisialisasi GetStorage dengan penanganan error
   try {
     await GetStorage.init();
   } catch (e) {
     debugPrint("❌ Gagal inisialisasi GetStorage: $e");
   }
+
+  // ⬇️ Tambahkan controller global ini
+  Get.put(ListCutiController(), permanent: true);
+  Get.put(CutiController(), permanent: true);
+
 
   runApp(const MyApp());
 }
@@ -29,7 +34,7 @@ class MyApp extends StatelessWidget {
       getPages: AppPages.routes,
       defaultTransition: Transition.fadeIn,
       theme: ThemeData(
-        useMaterial3: true, // Material 3 untuk tampilan lebih modern
+        useMaterial3: true,
         primarySwatch: Colors.orange,
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(

@@ -12,7 +12,7 @@ class DetailCutiView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Pengajuan Cuti",
+          "Detail Pengajuan Cuti",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -29,7 +29,7 @@ class DetailCutiView extends StatelessWidget {
             const SizedBox(height: 12),
 
             // === Jenis Izin ===
-            _buildInfoRow("Jenis Izin", data['jenis'] ?? '-'),
+            _buildInfoRow("Jenis Izin", data['jenis_izin'] ?? '-'),
             const SizedBox(height: 12),
 
             // === Status Cuti ===
@@ -44,7 +44,8 @@ class DetailCutiView extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(data['status'] ?? "Menunggu Persetujuan"),
+                    color: _getStatusColor(
+                        data['status'] ?? "Menunggu Persetujuan"),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -56,12 +57,13 @@ class DetailCutiView extends StatelessWidget {
             ),
 
             const SizedBox(height: 12),
-            _buildInfoRow("Tanggal Pengajuan", data['tanggal_pengajuan'] ?? '-'),
+            _buildInfoRow(
+                "Tanggal Pengajuan", data['tanggal_pengajuan'] ?? '-'),
 
             const SizedBox(height: 12),
             _buildInfoRow(
               "Tanggal Izin",
-              "${data['tanggal_mulai'] ?? '-'}  s/d  ${data['tanggal_selesai'] ?? '-'}",
+              "${data['tanggal_izin'] ?? '-'}  s/d  ${data['tanggal_selesai'] ?? '-'}",
             ),
 
             const SizedBox(height: 12),
@@ -69,7 +71,7 @@ class DetailCutiView extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // === Lampiran File ===
+            // === Lampiran File (opsional) ===
             if (data['lampiran'] != null && data['lampiran'] != '')
               _buildInfoRow("Lampiran", data['lampiran']),
             if (data['form_cuti'] != null && data['form_cuti'] != '')
@@ -131,10 +133,10 @@ class DetailCutiView extends StatelessWidget {
 
   // Warna status
   Color _getStatusColor(String status) {
-    switch (status) {
-      case "Disetujui":
+    switch (status.toLowerCase()) {
+      case "disetujui":
         return Colors.green;
-      case "Ditolak":
+      case "ditolak":
         return Colors.red;
       default:
         return Colors.orange;

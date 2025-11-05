@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mengabsen/app/modules/list_cuti/controllers/list_cuti_controller.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
@@ -133,6 +134,18 @@ class CutiController extends GetxController {
       final result = json.decode(response.body);
 
       if (response.statusCode == 201 || response.statusCode == 200) {
+        // ✅ Tambahkan data ke ListCutiController agar langsung tampil di ListCutiView
+        final listController = Get.find<ListCutiController>();
+        listController.tambahCuti({
+          ...data,
+          "nama": namaController.text,
+          "nik": nikController.text,
+          "status": "Menunggu Persetujuan",
+        });
+
+        // ✅ Tambahkan juga ke list lokal (opsional)
+        cutiList.add(data);
+
         await fetchCuti(); // 🔥 refresh data sebelum popup muncul
         _showPopup(context, true, "Cuti Berhasil Diajukan",
             "Permintaan berhasil diajukan. Silahkan menunggu konfirmasi dari HRD.");
@@ -192,6 +205,7 @@ class CutiController extends GetxController {
               onPressed: () {
                 Get.back(); // tutup popup
                 if (success) {
+                  fetchCuti();
                   Get.back(); // balik ke ListCutiView
                 }
               },
