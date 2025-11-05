@@ -6,8 +6,14 @@ class DetailCutiView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ambil data cuti dari Get.arguments
     final Map<String, dynamic> data = Get.arguments ?? {};
+
+    print("📦 Data diterima di DetailCutiView:");
+    print(data);
+
+    final nama = data['karyawan']?['nama_lengkap'] ?? '-';
+    final nik = data['karyawan']?['nik'] ?? '-';
+
 
     return Scaffold(
       appBar: AppBar(
@@ -22,17 +28,12 @@ class DetailCutiView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // === Informasi Karyawan ===
-            _buildInfoRow("Nama Lengkap", data['nama'] ?? '-'),
-            _buildInfoRow("NIK", data['nik'] ?? '-'),
+            _buildInfoRow("Nama Lengkap", nama),
+            _buildInfoRow("NIK", nik),
             _buildInfoRow("Jabatan", data['jabatan'] ?? '-'),
             const SizedBox(height: 12),
-
-            // === Jenis Izin ===
             _buildInfoRow("Jenis Izin", data['jenis_izin'] ?? '-'),
             const SizedBox(height: 12),
-
-            // === Status Cuti ===
             Row(
               children: [
                 const Text(
@@ -41,11 +42,9 @@ class DetailCutiView extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(
-                        data['status'] ?? "Menunggu Persetujuan"),
+                    color: _getStatusColor(data['status'] ?? "Menunggu Persetujuan"),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -55,31 +54,15 @@ class DetailCutiView extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 12),
-            _buildInfoRow(
-                "Tanggal Pengajuan", data['tanggal_pengajuan'] ?? '-'),
-
-            const SizedBox(height: 12),
+            _buildInfoRow("Tanggal Pengajuan", data['tanggal_pengajuan'] ?? '-'),
             _buildInfoRow(
               "Tanggal Izin",
-              "${data['tanggal_izin'] ?? '-'}  s/d  ${data['tanggal_selesai'] ?? '-'}",
+              "${data['tanggal_izin'] ?? '-'} s/d ${data['tanggal_selesai'] ?? '-'}",
             ),
-
             const SizedBox(height: 12),
             _buildInfoRow("Alasan", data['alasan'] ?? '-'),
-
-            const SizedBox(height: 12),
-
-            // === Lampiran File (opsional) ===
-            if (data['lampiran'] != null && data['lampiran'] != '')
-              _buildInfoRow("Lampiran", data['lampiran']),
-            if (data['form_cuti'] != null && data['form_cuti'] != '')
-              _buildInfoRow("Form Cuti", data['form_cuti']),
-
             const SizedBox(height: 30),
-
-            // Tombol OK
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -107,7 +90,6 @@ class DetailCutiView extends StatelessWidget {
     );
   }
 
-  // Widget untuk membuat baris informasi
   Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -116,22 +98,15 @@ class DetailCutiView extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 14),
-          ),
+          Text(value, style: const TextStyle(fontSize: 14)),
         ],
       ),
     );
   }
 
-  // Warna status
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case "disetujui":
