@@ -53,25 +53,31 @@ class LoginEmailController extends GetxController {
         final username = user['username'] ?? "Pengguna";
         final emailUser = user['email'] ?? email;
         final role = (user['role'] ?? "karyawan").toString().toLowerCase();
-        final karyawanId = user['id']; // 🔹 ambil ID user dari API
+        final karyawanId = user['id']?.toString(); // ✅ convert ke String aman
 
         // ✅ Simpan semua ke GetStorage
         storage.write("username", username);
         storage.write("email", emailUser);
         storage.write("role", role);
         storage.write("token", token.value);
-        storage.write("karyawan_id", karyawanId); // 🔹 tambahkan ini!
+        storage.write("karyawan_id", karyawanId); // ✅ aman untuk semua tipe
 
         print("✅ Username disimpan: $username");
         print("✅ Email disimpan: $emailUser");
         print("✅ Role disimpan: $role");
         print("✅ Karyawan ID disimpan: $karyawanId");
 
-        // Masuk ke Home
+        // 🔥 Hapus instance HomeController lama
+        Get.delete<HomeController>();
+
+        // 🆕 Buat ulang supaya ambil role & username terbaru
+        Get.put(HomeController());
+
+        // Arahkan ke HomeView
         Get.offAll(() => const HomeView());
+
       } else {
-        showErrorSnackbar(
-            "Login Gagal", data['message'] ?? "Terjadi kesalahan");
+        showErrorSnackbar("Login Gagal", data['message'] ?? "Terjadi kesalahan");
       }
     } catch (e) {
       print("❌ Error login: $e");

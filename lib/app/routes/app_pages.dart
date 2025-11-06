@@ -189,8 +189,8 @@ class AppPages {
       binding: SuratTugasDetailBinding(),
     ),
     GetPage(
-      name: '/hrd-cuti',
-      page: () => const HrdCutiView(),
+      name: Routes.HRD_CUTI,
+      page: () =>  HrdCutiView(),
       binding: HrdCutiBinding(),
     ),
     GetPage(

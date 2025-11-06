@@ -1,3 +1,4 @@
+import 'package:flutter_application_mengabsen/app/modules/home/controllers/home_controller.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -19,7 +20,9 @@ class ProfilController extends GetxController {
     email.value = box.read('email') ?? 'Email belum tersedia';
   }
 
-  void logout() {
-    box.erase(); // Hapus semua data user dari penyimpanan
+    void logout() {
+    box.erase();
+    Get.delete<HomeController>(); // 🔥 hapus state yang nyangkut
   }
+
 }

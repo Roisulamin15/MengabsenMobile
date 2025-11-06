@@ -48,13 +48,22 @@ class CutiController extends GetxController {
     return DateFormat("yyyy-MM-dd").format(date);
   }
 
-  /// Ambil list cuti dari server
+  int _readKaryawanId() {
+    final raw = box.read('karyawan_id');
+    if (raw == null) return 0;
+    if (raw is int) return raw;
+    return int.tryParse(raw.toString()) ?? 0;
+  }
+
+  /// Ambil list cuti dari server (hanya milik karyawan ini)
   Future<void> fetchCuti() async {
     final token = box.read('token') ?? '';
-    final karyawanId = box.read('karyawan_id');
-    if (token.isEmpty || karyawanId == null) {
+    final karyawanId = _readKaryawanId();
+
+    if (token.isEmpty || karyawanId == 0) {
       Get.snackbar("Error", "Token atau ID karyawan tidak ditemukan",
           backgroundColor: Colors.red, colorText: Colors.white);
+      cutiList.clear();
       return;
     }
 
@@ -73,9 +82,30 @@ class CutiController extends GetxController {
 
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
-        cutiList.value = List<Map<String, dynamic>>.from(result['data'] ?? []);
+
+        // Ambil list dari berbagai bentuk response
+        List<dynamic> raw = [];
+        if (result is List) raw = result;
+        else if (result is Map && result['data'] is List) raw = result['data'];
+        else raw = [];
+
+        // Filter (double-safety) berdasarkan karyawan_id
+        final filtered = raw.where((e) {
+          try {
+            return e['karyawan_id'].toString() == karyawanId.toString();
+          } catch (_) {
+            return false;
+          }
+        }).map<Map<String, dynamic>>((e) {
+          if (e is Map<String, dynamic>) return e;
+          return Map<String, dynamic>.from(e as Map);
+        }).toList();
+
+        cutiList.value = filtered;
       } else {
         cutiList.clear();
+        Get.snackbar("Error", "Gagal memuat data cuti (${response.statusCode})",
+            backgroundColor: Colors.red, colorText: Colors.white);
       }
     } catch (e) {
       cutiList.clear();
@@ -89,9 +119,9 @@ class CutiController extends GetxController {
   /// Kirim data cuti ke server
   Future<void> kirimCutiKeServer(BuildContext context) async {
     final token = box.read('token') ?? '';
-    final karyawanId = box.read('karyawan_id');
+    final karyawanId = _readKaryawanId();
 
-    if (token.isEmpty || karyawanId == null) {
+    if (token.isEmpty || karyawanId == 0) {
       _showPopup(context, false, "Cuti Gagal Diajukan",
           "Token atau ID karyawan tidak ditemukan. Silakan login ulang.");
       return;
@@ -107,7 +137,7 @@ class CutiController extends GetxController {
     }
 
     final data = {
-      "karyawan_id": karyawanId,
+      "karyawan_id": karyawanId, // INT (penting)
       "jabatan": selectedJabatan.value,
       "jenis_izin": selectedIzin.value,
       "tanggal_pengajuan": formatTanggal(tanggalPengajuan.value),
@@ -134,24 +164,55 @@ class CutiController extends GetxController {
       final result = json.decode(response.body);
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        // ✅ Tambahkan data ke ListCutiController agar langsung tampil di ListCutiView
-        final listController = Get.find<ListCutiController>();
-        listController.tambahCuti({
-          ...data,
-          "nama": namaController.text,
-          "nik": nikController.text,
-          "status": "Menunggu Persetujuan",
-        });
+        // update local list view utama (ListCutiController) jika ada
+        try {
+          final listController = Get.find<ListCutiController>();
+          final localItem = {
+            // bentuk lokal agar konsisten dengan server response minimal
+            "id": result is Map && result['data']?['id'] != null
+                ? result['data']['id']
+                : DateTime.now().millisecondsSinceEpoch,
+            "karyawan_id": karyawanId,
+            "jabatan": selectedJabatan.value,
+            "jenis_izin": selectedIzin.value,
+            "tanggal_pengajuan": formatTanggal(tanggalPengajuan.value),
+            "tanggal_izin": formatTanggal(tanggalMulai.value),
+            "tanggal_selesai": formatTanggal(tanggalSelesai.value),
+            "alasan": alasanController.text,
+            "status": result is Map && result['data']?['status'] != null
+                ? result['data']['status']
+                : "Menunggu Persetujuan",
+            // tambahkan subobject karyawan agar UI bisa menampilkan nama & nik
+            "karyawan": {
+              "id": karyawanId,
+              "nama_lengkap": namaController.text,
+              "nik": nikController.text,
+            }
+          };
+          listController.tambahCuti(localItem);
+        } catch (_) {
+          // jika ListCutiController tidak ditemukan, skip
+        }
 
-        // ✅ Tambahkan juga ke list lokal (opsional)
-        cutiList.add(data);
+        // juga tambahkan ke cutiList lokal di halaman pengajuan (opsional)
+        cutiList.insert(
+            0,
+            {
+              ...data,
+              "status": "Menunggu Persetujuan",
+              "karyawan": {
+                "id": karyawanId,
+                "nama_lengkap": namaController.text,
+                "nik": nikController.text,
+              }
+            });
 
-        await fetchCuti(); // 🔥 refresh data sebelum popup muncul
+        await fetchCuti(); // refresh dari server (lebih authoritative)
         _showPopup(context, true, "Cuti Berhasil Diajukan",
             "Permintaan berhasil diajukan. Silahkan menunggu konfirmasi dari HRD.");
       } else {
         _showPopup(context, false, "Cuti Gagal Diajukan",
-            result['message'] ?? "Gagal mengirim data.");
+            result is Map ? (result['message'] ?? "Gagal mengirim data.") : "Gagal mengirim data.");
       }
     } catch (e) {
       _showPopup(context, false, "Cuti Gagal Diajukan",

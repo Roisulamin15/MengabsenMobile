@@ -9,144 +9,91 @@ class ApiService {
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
     final url = Uri.parse('$baseUrl/auth/login');
-    print("🔗 [LOGIN] $url");
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: jsonEncode({"email": email, "password": password}),
-      );
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: jsonEncode({"email": email, "password": password}),
+    );
 
-      print("📥 [LOGIN RESPONSE] ${response.body}");
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception("Login gagal: ${response.body}");
-      }
-    } catch (e) {
-      throw Exception("Gagal konek ke server: $e");
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception(response.body);
     }
   }
 
-  // 🔹 AJUKAN CUTI (Karyawan)
+  // 🔹 AJUKAN CUTI
   static Future<Map<String, dynamic>> ajukanCuti(
       Map<String, dynamic> data, String token) async {
     final url = Uri.parse('$baseUrl/outdays');
-    print("🔗 [AJUKAN CUTI] $url");
-    print("📩 Data: $data");
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Authorization": "Bearer $token",
-        },
-        body: jsonEncode(data),
-      );
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode(data),
+    );
 
-      print("📥 [AJUKAN CUTI RESPONSE] ${response.body}");
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception("Gagal mengajukan cuti: ${response.body}");
-      }
-    } catch (e) {
-      throw Exception("Gagal konek ke server: $e");
-    }
+    return jsonDecode(response.body);
   }
 
-  // 🔹 GET LIST CUTI (Semua)
+  // 🔹 GET LIST CUTI (HRD / Admin)
   static Future<List<Map<String, dynamic>>> getOutdays(String token) async {
-    final url = Uri.parse('$baseUrl/outdays');
-    print("🔗 [GET OUTDAYS] $url");
+    final url = Uri.parse('$baseUrl/outday'); // ✅ PENTING: gunakan ini
 
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          "Accept": "application/json",
-          "Authorization": "Bearer $token",
-        },
-      );
+    final response = await http.get(
+      url,
+      headers: {
+        "Accept": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
 
-      print("📥 [GET OUTDAYS RESPONSE] ${response.body}");
+    final decoded = jsonDecode(response.body);
 
-      if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-
-        // Laravel biasanya kirim {"data": [...]}
-        if (decoded is Map && decoded.containsKey('data')) {
-          return List<Map<String, dynamic>>.from(decoded['data']);
-        } else if (decoded is List) {
-          return List<Map<String, dynamic>>.from(decoded);
-        } else {
-          return [];
-        }
-      } else {
-        throw Exception("Gagal ambil data cuti: ${response.body}");
-      }
-    } catch (e) {
-      throw Exception("Gagal konek ke server: $e");
+    if (decoded is Map && decoded.containsKey('data')) {
+      return List<Map<String, dynamic>>.from(decoded['data']);
+    } else if (decoded is List) {
+      return List<Map<String, dynamic>>.from(decoded);
     }
+
+    return [];
   }
 
-  // 🔹 APPROVE CUTI (HRD/PIC)
+  // 🔹 APPROVE CUTI
   static Future<Map<String, dynamic>> approveCuti(int id, String token) async {
-    final url = Uri.parse('$baseUrl/outdays/$id/approve');
-    print("🔗 [APPROVE CUTI] $url");
+    final url = Uri.parse('$baseUrl/outday/$id/approve');
 
-    try {
-      final response = await http.put( // ✅ Laravel pakai PUT
-        url,
-        headers: {
-          "Accept": "application/json",
-          "Authorization": "Bearer $token",
-        },
-      );
+    final response = await http.put(
+      url,
+      headers: {
+        "Accept": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
 
-      print("📥 [APPROVE CUTI RESPONSE] ${response.body}");
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception("Gagal approve cuti: ${response.body}");
-      }
-    } catch (e) {
-      throw Exception("Gagal konek ke server: $e");
-    }
+    return jsonDecode(response.body);
   }
 
-  // 🔹 REJECT CUTI (HRD/PIC)
+  // 🔹 REJECT CUTI
   static Future<Map<String, dynamic>> rejectCuti(int id, String token) async {
-    final url = Uri.parse('$baseUrl/outdays/$id/reject');
-    print("🔗 [REJECT CUTI] $url");
+    final url = Uri.parse('$baseUrl/outday/$id/reject');
 
-    try {
-      final response = await http.put( // ✅ Laravel pakai PUT juga
-        url,
-        headers: {
-          "Accept": "application/json",
-          "Authorization": "Bearer $token",
-        },
-      );
+    final response = await http.put(
+      url,
+      headers: {
+        "Accept": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
 
-      print("📥 [REJECT CUTI RESPONSE] ${response.body}");
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception("Gagal reject cuti: ${response.body}");
-      }
-    } catch (e) {
-      throw Exception("Gagal konek ke server: $e");
-    }
+    return jsonDecode(response.body);
   }
 }

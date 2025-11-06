@@ -43,6 +43,10 @@ class ListCutiView extends StatelessWidget {
           Expanded(
             child: Obx(() {
               final data = listController.cutiList;
+              if (listController.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
               if (data.isEmpty) {
                 return const Center(
                   child: Text(
@@ -59,6 +63,14 @@ class ListCutiView extends StatelessWidget {
                   final item = data[index];
                   String status = (item['status'] ?? 'Menunggu Persetujuan').toString();
 
+                  // tampilkan nama jika tersedia
+                  final nama = item['karyawan'] != null
+                      ? (item['karyawan']['nama_lengkap'] ?? item['karyawan']['nama'] ?? '')
+                      : (item['nama'] ?? '');
+
+                  final jenis = item['jenis_izin'] ?? '-';
+                  final tanggal = item['tanggal_pengajuan'] ?? '-';
+
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
                     shape: RoundedRectangleBorder(
@@ -67,13 +79,15 @@ class ListCutiView extends StatelessWidget {
                     elevation: 2,
                     child: ListTile(
                       onTap: () {
+                        // kirim item ke detail sebagai argumen
                         Get.to(
-                          () => DetailCutiView(),arguments: item,
+                          () => DetailCutiView(),
+                          arguments: item,
                         );
                       },
                       leading: const Icon(Icons.description, color: Colors.orange),
                       title: Text(
-                        item['jenis_izin'] ?? '-',
+                        jenis,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Column(
@@ -89,13 +103,18 @@ class ListCutiView extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            "Tanggal: ${item['tanggal_pengajuan'] ?? '-'}",
+                            "Tanggal: $tanggal",
                             style: const TextStyle(color: Colors.grey),
                           ),
+                          if (nama.isNotEmpty) const SizedBox(height: 2),
+                          if (nama.isNotEmpty)
+                            Text(
+                              nama,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
                         ],
                       ),
-                      trailing: const Icon(Icons.arrow_forward_ios,
-                          size: 16, color: Colors.grey),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
                     ),
                   );
                 },
@@ -109,8 +128,7 @@ class ListCutiView extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               child: const Text(
                 "Ajukan Cuti",

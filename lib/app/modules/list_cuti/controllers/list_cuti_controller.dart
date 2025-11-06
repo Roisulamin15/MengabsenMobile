@@ -3,75 +3,84 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+import 'package:flutter/material.dart';
 
-    class ListCutiController extends GetxController {
-      var cutiList = <Map<String, dynamic>>[].obs;
-      var isLoading = false.obs;
-      final box = GetStorage();
-      Timer? _timer; // 🕒 untuk auto-refresh
+class ListCutiController extends GetxController {
+  var cutiList = <Map<String, dynamic>>[].obs;
+  var isLoading = false.obs;
+  final box = GetStorage();
+  Timer? _timer; // 🕒 untuk auto-refresh
 
-      /// Ambil data cuti dari server
-      Future<void> fetchCuti() async {
-      final token = box.read('token') ?? '';
-      final karyawanId = box.read('karyawan_id');
+  /// Ambil data cuti dari server (hanya untuk karyawan yang login)
+  Future<void> fetchCuti() async {
+    final token = box.read('token') ?? '';
+    final karyawanId = box.read('karyawan_id');
 
-      if (token.isEmpty || karyawanId == null) {
-        print("⚠️ Token atau karyawan_id belum tersedia");
-        return;
-      }
-
-      try {
-        isLoading.value = true;
-
-        final url = Uri.parse(
-          "https://nonvaluable-gerardo-unstormed.ngrok-free.dev/api/outday?karyawan_id=$karyawanId",
-        );
-
-        final response = await http.get(
-          url,
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Accept': 'application/json',
-          },
-        );
-
-        if (response.statusCode == 200) {
-          final result = json.decode(response.body);
-
-          // ✅ Ganti bagian ini dengan yang baru:
-          if (result is List) {
-            cutiList.value = result.map<Map<String, dynamic>>((e) {
-              return {
-                ...e,
-                "karyawan": e["karyawan"], // ✅ pastikan relasi ikut
-              };
-            }).toList();
-          } else if (result is Map && result['data'] is List) {
-            cutiList.value = (result['data'] as List).map<Map<String, dynamic>>((e) {
-              return {
-                ...e,
-                "karyawan": e["karyawan"], // ✅ pastikan relasi ikut
-              };
-            }).toList();
-          } else {
-            print("⚠️ Format data tidak dikenali, kosongkan list");
-            cutiList.clear();
-          }
-
-          print("✅ Data cuti berhasil dimuat (${cutiList.length} item)");
-          if (cutiList.isNotEmpty) {
-            print("👤 Contoh data pertama: ${cutiList.first}");
-          }
-        } else {
-          print("❌ Gagal ambil data: ${response.statusCode}");
-        }
-      } catch (e) {
-        print("❌ Error fetch cuti: $e");
-      } finally {
-        isLoading.value = false;
-      }
+    if (token.isEmpty || karyawanId == null) {
+      print("⚠️ Token atau karyawan_id belum tersedia");
+      cutiList.clear();
+      return;
     }
 
+    try {
+      isLoading.value = true;
+
+      final url = Uri.parse(
+        "https://nonvaluable-gerardo-unstormed.ngrok-free.dev/api/outday?karyawan_id=$karyawanId",
+      );
+
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+
+        List<dynamic> rawList = [];
+
+        if (result is List) {
+          rawList = result;
+        } else if (result is Map && result['data'] is List) {
+          rawList = result['data'];
+        } else {
+          // format tidak dikenali
+          rawList = [];
+        }
+
+        // 🔥 Filter di client side: hanya ambil yang punya karyawan_id sama dengan user login
+        final filtered = rawList.where((e) {
+          try {
+            return e['karyawan_id'].toString() == karyawanId.toString();
+          } catch (_) {
+            return false;
+          }
+        }).map<Map<String, dynamic>>((e) {
+          // pastikan item adalah Map<String, dynamic>
+          if (e is Map<String, dynamic>) return e;
+          return Map<String, dynamic>.from(e as Map);
+        }).toList();
+
+        cutiList.value = filtered;
+
+        print("✅ Data cuti berhasil dimuat (${cutiList.length} item)");
+        if (cutiList.isNotEmpty) {
+          print("👤 Contoh data pertama: ${cutiList.first}");
+        }
+      } else {
+        print("❌ Gagal ambil data: ${response.statusCode}");
+        cutiList.clear();
+      }
+    } catch (e) {
+      print("❌ Error fetch cuti: $e");
+      cutiList.clear();
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   /// Tambah data lokal (setelah kirim cuti sukses)
   void tambahCuti(Map<String, dynamic> data) {

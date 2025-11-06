@@ -2,21 +2,22 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_mengabsen/app/modules/edit_profil/controllers/edit_profil_controller.dart';
 import 'package:flutter_application_mengabsen/app/modules/edit_profil/views/edit_profil_view.dart';
-import 'package:flutter_application_mengabsen/app/modules/hrd_cuti/views/hrd_cuti_view.dart';
-import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/views/karyawan_absen_view.dart';
-import 'package:flutter_application_mengabsen/app/modules/lembur/bindings/lembur_binding.dart';
+import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/lembur/views/lembur_view.dart';
-import 'package:flutter_application_mengabsen/app/modules/surat_tugas/bindings/surat_tugas_binding.dart';
+import 'package:flutter_application_mengabsen/app/modules/lembur/bindings/lembur_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/surat_tugas/views/surat_tugas_view.dart';
-import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
-import '../controllers/home_controller.dart';
+import 'package:flutter_application_mengabsen/app/modules/surat_tugas/bindings/surat_tugas_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/list_cuti/views/list_cuti_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/list_cuti/bindings/list_cuti_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/reimbursement/views/reimbursement_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/reimbursement/bindings/reimbursement_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/profil/views/profil_view.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+
+import '../controllers/home_controller.dart';
+import 'package:flutter_application_mengabsen/app/routes/app_pages.dart'; // ✅ penting!
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -26,7 +27,7 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  final HomeController controller = Get.put(HomeController(), permanent: true);
+  final HomeController controller = Get.put(HomeController());
   final PageController _pageController = PageController();
   int _currentPage = 0;
   Timer? _sliderTimer;
@@ -50,12 +51,10 @@ class _HomeViewState extends State<HomeView> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _showBannerPopup();
 
-      // 🔹 Ambil data profil dari penyimpanan
       String? nama = box.read('nama');
       String? email = box.read('email');
       String? nik = box.read('nik');
 
-      // 🔹 Cek kelengkapan profil
       bool profilLengkap = nama != null &&
           nama.isNotEmpty &&
           email != null &&
@@ -63,7 +62,6 @@ class _HomeViewState extends State<HomeView> {
           nik != null &&
           nik.isNotEmpty;
 
-      // 🔹 Jika profil belum lengkap, tampilkan popup
       if (!profilLengkap) {
         _showProfilPopup();
       }
@@ -92,7 +90,6 @@ class _HomeViewState extends State<HomeView> {
     });
   }
 
-  // 🔶 Popup Banner
   Future<void> _showBannerPopup() async {
     return showDialog(
       context: context,
@@ -113,7 +110,6 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  // 🟢 Popup "Lengkapi Profil Anda"
   void _showProfilPopup() {
     showDialog(
       context: context,
@@ -280,11 +276,12 @@ class _HomeViewState extends State<HomeView> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            child:
-                _buildMenuButton(Icons.event, "Cuti", Colors.orange, () {
+            child: _buildMenuButton(Icons.event, "Cuti", Colors.orange, () {
               final role = controller.role.value.toLowerCase();
+
               if (role == "hrd" || role == "pic") {
-                Get.to(() => const HrdCutiView());
+                // ✅ FIX: gunakan named route agar binding otomatis
+                Get.toNamed(Routes.HRD_CUTI);
               } else {
                 Get.to(() => ListCutiView(), binding: ListCutiBinding());
               }
