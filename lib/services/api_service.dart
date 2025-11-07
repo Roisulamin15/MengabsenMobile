@@ -26,6 +26,38 @@ class ApiService {
     }
   }
 
+  // 🔹 GET PROFILE
+  static Future<Map<String, dynamic>?> getProfile(String token) async {
+    final url = Uri.parse('$baseUrl/profile');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data['status'] == 'success' && data['profile'] != null) {
+          print('✅ Profil ditemukan dari API');
+          return data['profile'];
+        } else {
+          print('⚠️ Struktur JSON tidak sesuai: ${response.body}');
+        }
+      } else {
+        print('⚠️ Gagal ambil profil: ${response.statusCode} → ${response.body}');
+      }
+    } catch (e) {
+      print('❌ Error ambil profil: $e');
+    }
+
+    return null;
+  }
+
   // 🔹 AJUKAN CUTI
   static Future<Map<String, dynamic>> ajukanCuti(
       Map<String, dynamic> data, String token) async {
@@ -44,9 +76,9 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  // 🔹 GET LIST CUTI (HRD / Admin)
+  // 🔹 GET LIST CUTI
   static Future<List<Map<String, dynamic>>> getOutdays(String token) async {
-    final url = Uri.parse('$baseUrl/outday'); // ✅ PENTING: gunakan ini
+    final url = Uri.parse('$baseUrl/outday');
 
     final response = await http.get(
       url,

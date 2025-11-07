@@ -2,22 +2,21 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_mengabsen/app/modules/edit_profil/controllers/edit_profil_controller.dart';
 import 'package:flutter_application_mengabsen/app/modules/edit_profil/views/edit_profil_view.dart';
-import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/views/karyawan_absen_view.dart';
+import 'package:flutter_application_mengabsen/app/modules/hrd_cuti/views/hrd_cuti_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
-import 'package:flutter_application_mengabsen/app/modules/lembur/views/lembur_view.dart';
+import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/views/karyawan_absen_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/lembur/bindings/lembur_binding.dart';
-import 'package:flutter_application_mengabsen/app/modules/surat_tugas/views/surat_tugas_view.dart';
+import 'package:flutter_application_mengabsen/app/modules/lembur/views/lembur_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/surat_tugas/bindings/surat_tugas_binding.dart';
+import 'package:flutter_application_mengabsen/app/modules/surat_tugas/views/surat_tugas_view.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import '../controllers/home_controller.dart';
 import 'package:flutter_application_mengabsen/app/modules/list_cuti/views/list_cuti_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/list_cuti/bindings/list_cuti_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/reimbursement/views/reimbursement_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/reimbursement/bindings/reimbursement_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/profil/views/profil_view.dart';
-import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
-
-import '../controllers/home_controller.dart';
-import 'package:flutter_application_mengabsen/app/routes/app_pages.dart'; // ✅ penting!
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -27,7 +26,7 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  final HomeController controller = Get.put(HomeController());
+  final HomeController controller = Get.put(HomeController(), permanent: true);
   final PageController _pageController = PageController();
   int _currentPage = 0;
   Timer? _sliderTimer;
@@ -46,24 +45,24 @@ class _HomeViewState extends State<HomeView> {
     _startAutoSlide();
   }
 
+  /// 🔸 Cek apakah profil sudah lengkap (berdasarkan NIK)
   Future<void> _initializePopups() async {
     await GetStorage.init();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _showBannerPopup();
 
-      String? nama = box.read('nama');
-      String? email = box.read('email');
+      // 🔹 Ambil NIK dari penyimpanan
       String? nik = box.read('nik');
 
-      bool profilLengkap = nama != null &&
-          nama.isNotEmpty &&
-          email != null &&
-          email.isNotEmpty &&
-          nik != null &&
-          nik.isNotEmpty;
+      // 🔹 Cek kelengkapan profil (hanya berdasarkan NIK)
+      bool profilLengkap = nik != null && nik.isNotEmpty;
 
+      // 🔹 Jika NIK kosong => tampilkan popup
       if (!profilLengkap) {
+        print("⚠️ NIK kosong — tampilkan popup lengkapi profil");
         _showProfilPopup();
+      } else {
+        print("✅ NIK sudah terisi, popup tidak ditampilkan");
       }
     });
   }
@@ -90,6 +89,7 @@ class _HomeViewState extends State<HomeView> {
     });
   }
 
+  // 🔶 Popup Banner
   Future<void> _showBannerPopup() async {
     return showDialog(
       context: context,
@@ -110,14 +110,14 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
+  // 🟢 Popup "Lengkapi Profil Anda"
   void _showProfilPopup() {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -206,8 +206,7 @@ class _HomeViewState extends State<HomeView> {
         backgroundColor: Colors.orange,
         child: const Icon(Icons.camera_alt),
         onPressed: () {
-          Get.to(() => const KaryawanAbsenView(),
-              binding: KaryawanAbsenBinding());
+          Get.to(() => const KaryawanAbsenView(), binding: KaryawanAbsenBinding());
         },
       ),
     );
@@ -251,14 +250,12 @@ class _HomeViewState extends State<HomeView> {
                   children: [
                     Text(
                       "Halo, ${controller.username.value}",
-                      style:
-                          const TextStyle(color: Colors.white, fontSize: 18),
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       controller.role.value,
-                      style:
-                          const TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(color: Colors.white70, fontSize: 14),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
@@ -278,35 +275,28 @@ class _HomeViewState extends State<HomeView> {
           Expanded(
             child: _buildMenuButton(Icons.event, "Cuti", Colors.orange, () {
               final role = controller.role.value.toLowerCase();
-
               if (role == "hrd" || role == "pic") {
-                // ✅ FIX: gunakan named route agar binding otomatis
-                Get.toNamed(Routes.HRD_CUTI);
+                Get.to(() => const HrdCutiView());
               } else {
                 Get.to(() => ListCutiView(), binding: ListCutiBinding());
               }
             }),
           ),
           Expanded(
-            child: _buildMenuButton(
-                Icons.request_page, "Reimbursement", Colors.orange, () {
-              Get.to(() => const ReimbursementView(),
-                  binding: ReimbursementBinding());
+            child: _buildMenuButton(Icons.request_page, "Reimbursement", Colors.orange, () {
+              Get.to(() => const ReimbursementView(), binding: ReimbursementBinding());
             }),
           ),
           Expanded(
-            child: _buildMenuButton(
-                Icons.assignment, "Surat Tugas", Colors.orange, () {
+            child: _buildMenuButton(Icons.assignment, "Surat Tugas", Colors.orange, () {
               Get.to(() => SuratTugasView(), binding: SuratTugasBinding());
             }),
           ),
           Expanded(
-            child: _buildMenuButton(
-                Icons.receipt_long, "Slip Gaji", Colors.orange, () {}),
+            child: _buildMenuButton(Icons.receipt_long, "Slip Gaji", Colors.orange, () {}),
           ),
           Expanded(
-            child: _buildMenuButton(Icons.access_time, "Lembur",
-                Colors.orange, () {
+            child: _buildMenuButton(Icons.access_time, "Lembur", Colors.orange, () {
               Get.to(() => LemburView(), binding: LemburBinding());
             }),
           ),
@@ -342,25 +332,20 @@ class _HomeViewState extends State<HomeView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 title,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
             ...data.map((item) => Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: ListTile(
                     title: Text(item["jam"]!),
                     subtitle: Text(item["tanggal"]!),
                     trailing: Text(
                       item["status"]!,
-                      style: const TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold),
+                      style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                     ),
                   ),
                 )),
@@ -368,8 +353,7 @@ class _HomeViewState extends State<HomeView> {
         ));
   }
 
-  Widget _buildMenuButton(
-      IconData icon, String title, Color color, VoidCallback onTap) {
+  Widget _buildMenuButton(IconData icon, String title, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -405,9 +389,7 @@ class _HomeViewState extends State<HomeView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          IconButton(
-              icon: const Icon(Icons.home, color: Colors.orange),
-              onPressed: () {}),
+          IconButton(icon: const Icon(Icons.home, color: Colors.orange), onPressed: () {}),
           const SizedBox(width: 48),
           IconButton(
             icon: const Icon(Icons.person, color: Colors.orange),

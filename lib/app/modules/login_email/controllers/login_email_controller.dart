@@ -53,29 +53,47 @@ class LoginEmailController extends GetxController {
         final username = user['username'] ?? "Pengguna";
         final emailUser = user['email'] ?? email;
         final role = (user['role'] ?? "karyawan").toString().toLowerCase();
-        final karyawanId = user['id']?.toString(); // ✅ convert ke String aman
+        final karyawanId = user['id']?.toString();
+        final nik = user['nik']?.toString() ?? "";
 
         // ✅ Simpan semua ke GetStorage
         storage.write("username", username);
         storage.write("email", emailUser);
         storage.write("role", role);
         storage.write("token", token.value);
-        storage.write("karyawan_id", karyawanId); // ✅ aman untuk semua tipe
+        storage.write("karyawan_id", karyawanId);
+        storage.write("nik", nik);
 
-        print("✅ Username disimpan: $username");
-        print("✅ Email disimpan: $emailUser");
-        print("✅ Role disimpan: $role");
-        print("✅ Karyawan ID disimpan: $karyawanId");
+        print("✅ Login berhasil untuk $username");
 
-        // 🔥 Hapus instance HomeController lama
+        // 🔥 Ambil profil lengkap dari API
+        final profile = await ApiService.getProfile(token.value);
+        if (profile != null) {
+          print('✅ Profil lengkap diterima: $profile');
+
+          // Simpan data profil ke storage
+          storage.write("nama_lengkap", profile['nama_lengkap']);
+          storage.write("no_hp", profile['no_hp']);
+          storage.write("nik", profile['nik']);
+          storage.write("alamat", profile['alamat']);
+          storage.write("tanggal_lahir", profile['tanggal_lahir']);
+          storage.write("jenis_kelamin", profile['jenis_kelamin']);
+          storage.write("kelurahan", profile['kelurahan']);
+          storage.write("kecamatan", profile['kecamatan']);
+          storage.write("kota", profile['kota']);
+          storage.write("provinsi", profile['provinsi']);
+
+          print("✅ Profil berhasil disimpan ke storage");
+        } else {
+          print('! Tidak ada profil dari API');
+        }
+
+        // 🔄 Refresh HomeController
         Get.delete<HomeController>();
-
-        // 🆕 Buat ulang supaya ambil role & username terbaru
         Get.put(HomeController());
 
-        // Arahkan ke HomeView
+        // ⏩ Arahkan ke HomeView
         Get.offAll(() => const HomeView());
-
       } else {
         showErrorSnackbar("Login Gagal", data['message'] ?? "Terjadi kesalahan");
       }
