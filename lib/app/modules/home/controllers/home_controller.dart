@@ -17,9 +17,17 @@ class HomeController extends GetxController {
     _loadAbsenDummy();
   }
 
+  /// 🔹 Dipanggil ulang setiap kali masuk HomeView
   void ambilDataPengguna() {
     username.value = storage.read("username") ?? "Pengguna";
     role.value = storage.read("role") ?? "Karyawan";
+    print("✅ Data HomeController diperbarui: $username | $role");
+  }
+
+  /// 🔹 Reset semua data saat logout
+  void resetData() {
+    username.value = "Pengguna";
+    role.value = "Karyawan";
   }
 
   void _loadAbsenDummy() {

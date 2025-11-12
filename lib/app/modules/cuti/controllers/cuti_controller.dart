@@ -187,6 +187,7 @@ class CutiController extends GetxController {
               "id": karyawanId,
               "nama_lengkap": namaController.text,
               "nik": nikController.text,
+               "jabatan": selectedJabatan.value,
             }
           };
           listController.tambahCuti(localItem);

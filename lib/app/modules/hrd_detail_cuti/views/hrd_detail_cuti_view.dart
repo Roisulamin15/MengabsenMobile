@@ -12,7 +12,7 @@ class HrdDetailCutiView extends StatelessWidget {
 
     final nama = cuti['karyawan']?['nama_lengkap'] ?? '-';
     final nik = cuti['karyawan']?['nik'] ?? '-';
-    final jabatan = cuti['karyawan']?['jabatan'] ?? '-';
+    final jabatan = cuti['karyawan']?['jabatan'] ?? cuti['jabatan'] ?? '-';
     final jenis = cuti['jenis_izin'] ?? '-';
     final tanggalPengajuan = cuti['tanggal_pengajuan'] ?? '-';
     final tanggalMulai = cuti['tanggal_izin'] ?? '-';
@@ -30,7 +30,7 @@ class HrdDetailCutiView extends StatelessWidget {
           },
         ),
         title: const Text(
-          "Pengajuan Cuti",
+          "Detail Pengajuan Cuti",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,

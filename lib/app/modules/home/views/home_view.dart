@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_mengabsen/app/modules/edit_profil/controllers/edit_profil_controller.dart';
 import 'package:flutter_application_mengabsen/app/modules/edit_profil/views/edit_profil_view.dart';
+import 'package:flutter_application_mengabsen/app/modules/hrd_cuti/bindings/hrd_cuti_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/hrd_cuti/views/hrd_cuti_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/views/karyawan_absen_view.dart';
@@ -26,7 +27,7 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  final HomeController controller = Get.put(HomeController(), permanent: true);
+  final HomeController controller = Get.put(HomeController());
   final PageController _pageController = PageController();
   int _currentPage = 0;
   Timer? _sliderTimer;
@@ -276,7 +277,7 @@ class _HomeViewState extends State<HomeView> {
             child: _buildMenuButton(Icons.event, "Cuti", Colors.orange, () {
               final role = controller.role.value.toLowerCase();
               if (role == "hrd" || role == "pic") {
-                Get.to(() => const HrdCutiView());
+                Get.to(() => const HrdCutiView(), binding:HrdCutiBinding());
               } else {
                 Get.to(() => ListCutiView(), binding: ListCutiBinding());
               }
