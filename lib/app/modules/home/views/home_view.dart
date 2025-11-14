@@ -4,6 +4,8 @@ import 'package:flutter_application_mengabsen/app/modules/edit_profil/controller
 import 'package:flutter_application_mengabsen/app/modules/edit_profil/views/edit_profil_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/hrd_cuti/bindings/hrd_cuti_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/hrd_cuti/views/hrd_cuti_view.dart';
+import 'package:flutter_application_mengabsen/app/modules/hrd_lembur/bindings/hrd_lembur_binding.dart';
+import 'package:flutter_application_mengabsen/app/modules/hrd_lembur/views/hrd_lembur_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/views/karyawan_absen_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/lembur/bindings/lembur_binding.dart';
@@ -298,7 +300,12 @@ class _HomeViewState extends State<HomeView> {
           ),
           Expanded(
             child: _buildMenuButton(Icons.access_time, "Lembur", Colors.orange, () {
-              Get.to(() => LemburView(), binding: LemburBinding());
+              final role = controller.role.value.toLowerCase();
+              if (role == "hrd" || role == "pic") {
+                Get.to(() => const HrdLemburView(), binding:HrdLemburBinding());
+              } else {
+                Get.to(() => LemburView(), binding: LemburBinding());
+              }
             }),
           ),
         ],

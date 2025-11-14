@@ -24,6 +24,10 @@ import '../modules/hrd_cuti/bindings/hrd_cuti_binding.dart';
 import '../modules/hrd_cuti/views/hrd_cuti_view.dart';
 import '../modules/hrd_detail_cuti/bindings/hrd_detail_cuti_binding.dart';
 import '../modules/hrd_detail_cuti/views/hrd_detail_cuti_view.dart';
+import '../modules/hrd_detail_lembur/bindings/hrd_detail_lembur_binding.dart';
+import '../modules/hrd_detail_lembur/views/hrd_detail_lembur_view.dart';
+import '../modules/hrd_lembur/bindings/hrd_lembur_binding.dart';
+import '../modules/hrd_lembur/views/hrd_lembur_view.dart';
 import '../modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
 import '../modules/karyawan_absen/views/karyawan_absen_view.dart';
 import '../modules/karyawan_absen_wfa/bindings/karyawan_absen_wfa_binding.dart';
@@ -190,7 +194,7 @@ class AppPages {
     ),
     GetPage(
       name: Routes.HRD_CUTI,
-      page: () =>  HrdCutiView(),
+      page: () => HrdCutiView(),
       binding: HrdCutiBinding(),
     ),
     GetPage(
@@ -223,7 +227,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.DETAIL_LEMBUR,
-      page: () =>  DetailLemburView(),
+      page: () => DetailLemburView(),
       binding: DetailLemburBinding(),
     ),
     GetPage(
@@ -235,6 +239,16 @@ class AppPages {
       name: _Paths.RIWAYAT_ABSEN,
       page: () => const RiwayatAbsenView(),
       binding: RiwayatAbsenBinding(),
+    ),
+    GetPage(
+      name: _Paths.HRD_LEMBUR,
+      page: () => const HrdLemburView(),
+      binding: HrdLemburBinding(),
+    ),
+    GetPage(
+      name: _Paths.HRD_DETAIL_LEMBUR,
+      page: () =>  HrdDetailLemburView(lembur: Get.arguments,),
+      binding: HrdDetailLemburBinding(),
     ),
   ];
 }

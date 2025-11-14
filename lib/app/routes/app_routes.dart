@@ -35,6 +35,8 @@ abstract class Routes {
   static const DETAIL_LEMBUR = _Paths.DETAIL_LEMBUR;
   static const KARYAWAN_ABSEN_WFA = _Paths.KARYAWAN_ABSEN_WFA;
   static const RIWAYAT_ABSEN = _Paths.RIWAYAT_ABSEN;
+  static const HRD_LEMBUR = _Paths.HRD_LEMBUR;
+  static const HRD_DETAIL_LEMBUR = _Paths.HRD_DETAIL_LEMBUR;
 }
 
 abstract class _Paths {
@@ -71,4 +73,6 @@ abstract class _Paths {
   static const DETAIL_LEMBUR = '/detail-lembur';
   static const KARYAWAN_ABSEN_WFA = '/karyawan-absen-wfa';
   static const RIWAYAT_ABSEN = '/riwayat-absen';
+  static const HRD_LEMBUR = '/hrd-lembur';
+  static const HRD_DETAIL_LEMBUR = '/hrd-detail-lembur';
 }
