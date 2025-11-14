@@ -223,7 +223,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.DETAIL_LEMBUR,
-      page: () => const DetailLemburView(),
+      page: () =>  DetailLemburView(),
       binding: DetailLemburBinding(),
     ),
     GetPage(
@@ -232,11 +232,6 @@ class AppPages {
       binding: KaryawanAbsenBinding(), // pakai controller yang sama
     ),
     GetPage(
-      name: _Paths.RIWAYAT_ABSEN,
-      page: () => const RiwayatAbsenView(),
-      binding: RiwayatAbsenBinding(),
-    ),
-   GetPage(
       name: _Paths.RIWAYAT_ABSEN,
       page: () => const RiwayatAbsenView(),
       binding: RiwayatAbsenBinding(),

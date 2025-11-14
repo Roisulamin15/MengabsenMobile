@@ -1,11 +1,18 @@
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 class DetailLemburController extends GetxController {
-  late Map<String, dynamic> lembur;
+  var namaUser = '-'.obs;
+  var lembur = <String, dynamic>{}.obs;
+  final storage = GetStorage();
 
   @override
   void onInit() {
     super.onInit();
-    lembur = Get.arguments ?? {};
+    // Ambil nama user dari storage (hasil login)
+    namaUser.value = storage.read("nama_lengkap") ?? "-";
+
+    // Ambil data lembur dari Get.arguments
+    lembur.value = Get.arguments ?? {};
   }
 }

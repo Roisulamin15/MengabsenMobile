@@ -1,215 +1,183 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mengabsen/app/modules/form_lembur/controllers/form_lembur_controller.dart';
 import 'package:get/get.dart';
-import '../controllers/form_lembur_controller.dart';
-import '../../detail_lembur/views/detail_lembur_view.dart';
-import '../../detail_lembur/controllers/detail_lembur_controller.dart';
+
 
 class LemburFormView extends GetView<LemburFormController> {
   const LemburFormView({super.key});
+
+  InputDecoration formDecoration({String? hint}) {
+    return InputDecoration(
+      hintText: hint,
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(vertical: 8),
+      enabledBorder: const UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.grey),
+      ),
+      focusedBorder: const UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.orange, width: 1.5),
+      ),
+    );
+  }
+
+  Widget buildLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(LemburFormController());
 
-    InputDecoration underlineDeco(String label, {Widget? suffix}) =>
-        InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: Colors.black54),
-          enabledBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.black26),
-          ),
-          focusedBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.orange, width: 2),
-          ),
-          suffixIcon: suffix,
-        );
-
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Pengajuan Lembur'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
+        title: const Text("Pengajuan Lembur"),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView(
-          children: [
-            TextField(
-              controller: controller.namaC,
-              decoration: underlineDeco('Nama'),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              decoration: underlineDeco('Jabatan'),
-              value: controller.jabatan.value.isEmpty
-                  ? null
-                  : controller.jabatan.value,
-              items: controller.jabatanList
-                  .map((j) => DropdownMenuItem(value: j, child: Text(j)))
-                  .toList(),
-              onChanged: (val) => controller.jabatan.value = val ?? '',
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller.jamMulaiC,
-              readOnly: true,
-              decoration: underlineDeco(
-                'Jam Mulai',
-                suffix: IconButton(
-                  icon: const Icon(Icons.access_time, color: Colors.orange),
-                  onPressed: () => controller.pickTime(context, true),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller.jamSelesaiC,
-              readOnly: true,
-              decoration: underlineDeco(
-                'Jam Selesai',
-                suffix: IconButton(
-                  icon: const Icon(Icons.access_time_filled,
-                      color: Colors.orange),
-                  onPressed: () => controller.pickTime(context, false),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller.durasiC,
-              readOnly: true,
-              decoration: underlineDeco('Durasi (jam & menit)'),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              decoration: underlineDeco('Jenis Hari'),
-              value: controller.jenisHari.value.isEmpty
-                  ? null
-                  : controller.jenisHari.value,
-              items: controller.jenisHariList
-                  .map((j) => DropdownMenuItem(value: j, child: Text(j)))
-                  .toList(),
-              onChanged: (val) => controller.jenisHari.value = val ?? '',
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller.deskripsiPekerjaanC,
-              maxLines: 2,
-              decoration: underlineDeco('Deskripsi Pekerjaan'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller.alasanLemburC,
-              maxLines: 2,
-              decoration: underlineDeco('Alasan Lembur'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller.keteranganC,
-              maxLines: 2,
-              decoration: underlineDeco('Keterangan (Opsional)'),
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  final success = controller.validateForm();
+      body: Obx(() => controller.isLoading.value
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildLabel("Nama Lengkap"),
+                  TextField(
+                    controller: controller.namaC,
+                    decoration: formDecoration(hint: "Masukkan nama lengkap"),
+                  ),
+                  const SizedBox(height: 12),
 
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (_) => AlertDialog(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      titlePadding: EdgeInsets.zero,
-                      title: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: success ? Colors.orange : Colors.redAccent,
-                          borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(12)),
+                  buildLabel("Jabatan"),
+                  Obx(() => DropdownButtonFormField<String>(
+                        value: controller.selectedJabatan.value.isEmpty
+                            ? null
+                            : controller.selectedJabatan.value,
+                        items: controller.jabatanList
+                            .map((e) =>
+                                DropdownMenuItem(value: e, child: Text(e)))
+                            .toList(),
+                        onChanged: (val) =>
+                            controller.selectedJabatan.value = val ?? "",
+                        decoration: formDecoration(),
+                      )),
+                  const SizedBox(height: 12),
+
+                  buildLabel("Tanggal Lembur"),
+                  Obx(() => TextFormField(
+                        readOnly: true,
+                        decoration: formDecoration(
+                          hint:
+                              "${controller.tanggalLembur.value.toLocal()}".split(' ')[0],
+                        ).copyWith(
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.calendar_today, size: 18),
+                            onPressed: () => controller.pickTanggal(context),
+                          ),
                         ),
-                        child: Text(
-                          'Konfirmasi Lembur',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            success ? Icons.check_circle : Icons.error,
-                            color:
-                                success ? Colors.green : Colors.redAccent,
-                            size: 60,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            success
-                                ? "Pengajuan lembur berhasil dikirim ke HRD."
-                                : "Gagal! Harap lengkapi semua field sebelum submit.",
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: success
-                                  ? Colors.orange
-                                  : Colors.redAccent,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)),
-                            ),
-                            onPressed: () {
-                              if (success) {
-                                controller.submitLembur(); // ✅ kirim ke DetailLemburView
-                              } else {
-                                Get.back(); // Tutup dialog
-                              }
-                            },
-                            child: const Text(
-                              'OK',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
+                      )),
+                  const SizedBox(height: 12),
+
+                  buildLabel("Jam Mulai"),
+                  TextFormField(
+                    controller: controller.jamMulaiC,
+                    readOnly: true,
+                    decoration: formDecoration(hint: "Pilih jam mulai").copyWith(
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.access_time, size: 18),
+                        onPressed: () =>
+                            controller.pickTime(context, true),
                       ),
                     ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
                   ),
-                ),
-                child: const Text(
-                  'Kirim Pengajuan',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
+                  const SizedBox(height: 12),
+
+                  buildLabel("Jam Selesai"),
+                  TextFormField(
+                    controller: controller.jamSelesaiC,
+                    readOnly: true,
+                    decoration:
+                        formDecoration(hint: "Pilih jam selesai").copyWith(
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.access_time, size: 18),
+                        onPressed: () =>
+                            controller.pickTime(context, false),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  buildLabel("Durasi (jam)"),
+                  TextField(
+                    controller: controller.durasiC,
+                    readOnly: true,
+                    decoration: formDecoration(hint: "Otomatis terisi"),
+                  ),
+                  const SizedBox(height: 12),
+
+                  buildLabel("Jenis Hari"),
+                  Obx(() => DropdownButtonFormField<String>(
+                        value: controller.selectedJenisHari.value.isEmpty
+                            ? null
+                            : controller.selectedJenisHari.value,
+                        items: controller.jenisHariList
+                            .map((e) =>
+                                DropdownMenuItem(value: e, child: Text(e)))
+                            .toList(),
+                        onChanged: (val) =>
+                            controller.selectedJenisHari.value = val ?? "",
+                        decoration: formDecoration(),
+                      )),
+                  const SizedBox(height: 12),
+
+                  buildLabel("Deskripsi Pekerjaan"),
+                  TextField(
+                    controller: controller.deskripsiC,
+                    maxLines: 2,
+                    decoration:
+                        formDecoration(hint: "Masukkan deskripsi pekerjaan"),
+                  ),
+                  const SizedBox(height: 12),
+
+                  buildLabel("Alasan Lembur"),
+                  TextField(
+                    controller: controller.alasanC,
+                    maxLines: 2,
+                    decoration: formDecoration(hint: "Masukkan alasan lembur"),
+                  ),
+                  const SizedBox(height: 12),
+
+                  buildLabel("Keterangan (opsional)"),
+                  TextField(
+                    controller: controller.keteranganC,
+                    maxLines: 2,
+                    decoration: formDecoration(hint: "Masukkan keterangan"),
+                  ),
+                  const SizedBox(height: 16),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () =>
+                          controller.submitLemburToServer(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text(
+                        "Kirim Pengajuan",
+                        style: TextStyle(color: Colors.white, fontSize: 15),
+                      ),
+                    ),
+                  )
+                ],
               ),
-            ),
-          ],
-        ),
-      ),
+            )),
     );
   }
 }
