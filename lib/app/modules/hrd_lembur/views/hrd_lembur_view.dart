@@ -33,7 +33,9 @@ class HrdLemburView extends GetView<HrdLemburController> {
             itemBuilder: (context, index) {
               final lembur = controller.lemburList[index];
 
-              final nama = controller.karyawanMap[lembur['karyawan_id']] ?? '-';
+              final nama = lembur['karyawan']?['nama_lengkap']
+              ?? controller.karyawanMap[lembur['karyawan_id']]
+              ?? '-';
               final tanggal =
                   lembur['tanggal_lembur'] ?? lembur['tanggal'] ?? '-';
               final durasi =

@@ -11,7 +11,9 @@ class HrdDetailLemburView extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<HrdLemburController>();
 
-    final nama = controller.karyawanMap[lembur['karyawan_id']] ?? '-';
+    final nama = lembur['karyawan']?['nama_lengkap']
+    ?? controller.karyawanMap[lembur['karyawan_id']]
+    ?? '-';
     final jabatan = lembur['jabatan'] ?? '-';
     final tanggal = lembur['tanggal_lembur'] ?? lembur['tanggal'] ?? '-';
     final mulai = lembur['jam_mulai'] ?? '-';
