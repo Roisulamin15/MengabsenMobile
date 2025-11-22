@@ -11,7 +11,12 @@ dependencies:
   flutter:
     sdk: flutter
 
-  #Plugin
+  # File & HTTP
+  file_picker: ^8.1.3
+  path: ^1.8.3
+  http: ^0.13.6
+
+  # Plugin
   image_picker: ^1.1.2
 
   # UI & Icon

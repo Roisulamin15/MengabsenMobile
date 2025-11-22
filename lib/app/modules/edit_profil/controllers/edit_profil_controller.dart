@@ -29,7 +29,7 @@ class EditProfilController extends GetxController {
   var role = "".obs;
   var fotoProfil = "".obs;
 
-  final baseUrl = "https://nonvaluable-gerardo-unstormed.ngrok-free.dev/api";
+  final baseUrl = "https://iotanesia-edu.web.id/api";
 
   @override
   void onInit() {

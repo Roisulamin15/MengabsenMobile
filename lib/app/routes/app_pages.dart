@@ -1,3 +1,4 @@
+import 'package:flutter_application_mengabsen/app/modules/surat_tugas_detail/views/surat_tugas_detail_view.dart';
 import 'package:get/get.dart';
 
 import '../modules/Landing_page/bindings/landing_page_binding.dart';
@@ -61,7 +62,7 @@ import '../modules/riwayat_absen/views/riwayat_absen_view.dart';
 import '../modules/surat_tugas/bindings/surat_tugas_binding.dart';
 import '../modules/surat_tugas/views/surat_tugas_view.dart';
 import '../modules/surat_tugas_detail/bindings/surat_tugas_detail_binding.dart';
-import '../modules/surat_tugas_detail/controllers/surat_tugas_detail_controller.dart';
+import '../modules/surat_tugas_detail/controllers/surat_tugas_detail_controller.dart' hide SuratTugasDetailView;
 import '../modules/surat_tugas_form/bindings/surat_tugas_form_binding.dart';
 import '../modules/surat_tugas_form/views/surat_tugas_form_view.dart';
 import '../modules/ubah_password/bindings/ubah_password_binding.dart';

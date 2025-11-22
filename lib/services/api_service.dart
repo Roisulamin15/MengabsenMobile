@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as p;
 
 class ApiService {
   static const String baseUrl =
-      "https://nonvaluable-gerardo-unstormed.ngrok-free.dev/api";
+      "https://iotanesia-edu.web.id/api";
 
   // =========================================
   // LOGIN
@@ -202,5 +204,101 @@ class ApiService {
     }
 
     return [];
+  }
+ // GET LIST SURAT TUGAS USER
+  static Future<List<Map<String, dynamic>>> getSuratTugas(String token) async {
+    final url = Uri.parse('$baseUrl/surat_tugas');
+
+    final response = await http.get(
+      url,
+      headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+    );
+
+    final decoded = jsonDecode(response.body);
+    return List<Map<String, dynamic>>.from(decoded['data'] ?? []);
+  }
+
+ // GET DETAIL SURAT TUGAS
+static Future<Map<String, dynamic>> getSuratTugasDetail(int id, String token) async {
+  final url = Uri.parse('$baseUrl/surat_tugas/$id');
+
+  final response = await http.get(
+    url,
+    headers: {
+      "Accept": "application/json",
+      "Authorization": "Bearer $token",
+    },
+  );
+
+  print("STATUS DETAIL: ${response.statusCode}");
+  print("BODY DETAIL: ${response.body}");
+
+  final decoded = jsonDecode(response.body);
+
+  if (response.statusCode != 200) {
+    throw Exception("HTTP ${response.statusCode}: ${response.body}");
+  }
+
+  // FORMAT 1 → { "data": {...} }
+  if (decoded is Map && decoded['data'] != null) {
+    return Map<String, dynamic>.from(decoded['data']);
+  }
+
+  // FORMAT 2 → { "surat_tugas": {...} }
+  if (decoded is Map && decoded['surat_tugas'] != null) {
+    return Map<String, dynamic>.from(decoded['surat_tugas']);
+  }
+
+  throw Exception("Format API tidak sesuai (tidak ada 'data' atau 'surat_tugas')");
+}
+
+
+
+  // ===============================
+  // SUBMIT SURAT TUGAS (STORE)
+  // ===============================
+  static Future<Map<String, dynamic>> submitSuratTugasBaru(
+      Map<String, dynamic> fields, String token) async {
+    final url = Uri.parse('$baseUrl/surat_tugas');
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: jsonEncode(fields),
+    );
+
+    final decoded = jsonDecode(response.body);
+    return Map<String, dynamic>.from(decoded);
+  }
+
+  // ===================================================================================
+  // COMPLETE SURAT TUGAS — UPLOAD TTD (file_ttd) + jam_selesai ke /surat_tugas/{id}/complete
+  // ===================================================================================
+  static Future<Map<String, dynamic>> completeSuratTugas(
+      int id, String jamSelesai, File? fileTtd, String token) async {
+    final uri = Uri.parse('$baseUrl/surat_tugas/$id/complete');
+    final request = http.MultipartRequest("POST", uri);
+
+    request.headers['Authorization'] = 'Bearer $token';
+    request.headers['Accept'] = 'application/json';
+
+    request.fields['jam_selesai'] = jamSelesai;
+
+    if (fileTtd != null && fileTtd.existsSync()) {
+      request.files.add(await http.MultipartFile.fromPath("file_ttd", fileTtd.path));
+    }
+
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Gagal complete surat tugas");
+    }
   }
 }

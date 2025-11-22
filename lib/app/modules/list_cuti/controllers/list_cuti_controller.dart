@@ -26,7 +26,7 @@ class ListCutiController extends GetxController {
       isLoading.value = true;
 
       final url = Uri.parse(
-        "https://nonvaluable-gerardo-unstormed.ngrok-free.dev/api/outday?karyawan_id=$karyawanId",
+        "https://iotanesia-edu.web.id/api/outday?karyawan_id=$karyawanId",
       );
 
       final response = await http.get(
