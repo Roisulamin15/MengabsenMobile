@@ -6,6 +6,8 @@ import 'package:flutter_application_mengabsen/app/modules/hrd_cuti/bindings/hrd_
 import 'package:flutter_application_mengabsen/app/modules/hrd_cuti/views/hrd_cuti_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/hrd_lembur/bindings/hrd_lembur_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/hrd_lembur/views/hrd_lembur_view.dart';
+import 'package:flutter_application_mengabsen/app/modules/hrd_surat_tugas/bindings/hrd_surat_tugas_binding.dart';
+import 'package:flutter_application_mengabsen/app/modules/hrd_surat_tugas/views/hrd_surat_tugas_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/views/karyawan_absen_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/lembur/bindings/lembur_binding.dart';
@@ -292,7 +294,12 @@ class _HomeViewState extends State<HomeView> {
           ),
           Expanded(
             child: _buildMenuButton(Icons.assignment, "Surat Tugas", Colors.orange, () {
-              Get.to(() => SuratTugasView(), binding: SuratTugasBinding());
+              final role = controller.role.value.toLowerCase();
+              if (role == "hrd" || role == "pic") {
+                Get.to(() => const HrdSuratTugasView(), binding:HrdSuratTugasBinding());
+              } else {
+                Get.to(() => SuratTugasView(), binding: SuratTugasBinding());
+              }
             }),
           ),
           Expanded(

@@ -81,7 +81,7 @@ class SuratTugasFormController extends GetxController {
     "jam_pertemuan": jamC.text, // pastikan format "HH:mm"
     "bertemu_dengan": bertemuC.text,
     "perusahaan": perusahaanC.text,
-    "bersama_dengan": bersamaC.text,
+    "bersama_dengan": "[\"${bersamaC.text}\"]",
     "tujuan_kunjungan": "Menghadiri Undangan Rapat / Meeting dari Klien",
     "detail_kunjungan": detailC.text,
   };

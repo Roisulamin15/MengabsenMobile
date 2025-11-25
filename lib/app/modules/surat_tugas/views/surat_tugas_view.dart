@@ -153,7 +153,8 @@ class SuratTugasView extends GetView<SuratTugasController> {
                       onTap: () {
                         Get.to(
                               () => const SuratTugasDetailView(),
-                          arguments: surat["raw"]);
+                          arguments: surat
+                          );
                       },
                       borderRadius: BorderRadius.circular(12),
                       child: Card(

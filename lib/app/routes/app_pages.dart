@@ -1,4 +1,3 @@
-import 'package:flutter_application_mengabsen/app/modules/surat_tugas_detail/views/surat_tugas_detail_view.dart';
 import 'package:get/get.dart';
 
 import '../modules/Landing_page/bindings/landing_page_binding.dart';
@@ -27,8 +26,12 @@ import '../modules/hrd_detail_cuti/bindings/hrd_detail_cuti_binding.dart';
 import '../modules/hrd_detail_cuti/views/hrd_detail_cuti_view.dart';
 import '../modules/hrd_detail_lembur/bindings/hrd_detail_lembur_binding.dart';
 import '../modules/hrd_detail_lembur/views/hrd_detail_lembur_view.dart';
+import '../modules/hrd_detail_surat_tugas/bindings/hrd_detail_surat_tugas_binding.dart';
+import '../modules/hrd_detail_surat_tugas/views/hrd_detail_surat_tugas_view.dart';
 import '../modules/hrd_lembur/bindings/hrd_lembur_binding.dart';
 import '../modules/hrd_lembur/views/hrd_lembur_view.dart';
+import '../modules/hrd_surat_tugas/bindings/hrd_surat_tugas_binding.dart';
+import '../modules/hrd_surat_tugas/views/hrd_surat_tugas_view.dart';
 import '../modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
 import '../modules/karyawan_absen/views/karyawan_absen_view.dart';
 import '../modules/karyawan_absen_wfa/bindings/karyawan_absen_wfa_binding.dart';
@@ -62,13 +65,16 @@ import '../modules/riwayat_absen/views/riwayat_absen_view.dart';
 import '../modules/surat_tugas/bindings/surat_tugas_binding.dart';
 import '../modules/surat_tugas/views/surat_tugas_view.dart';
 import '../modules/surat_tugas_detail/bindings/surat_tugas_detail_binding.dart';
-import '../modules/surat_tugas_detail/controllers/surat_tugas_detail_controller.dart' hide SuratTugasDetailView;
+import '../modules/surat_tugas_detail/views/surat_tugas_detail_view.dart';
 import '../modules/surat_tugas_form/bindings/surat_tugas_form_binding.dart';
 import '../modules/surat_tugas_form/views/surat_tugas_form_view.dart';
 import '../modules/ubah_password/bindings/ubah_password_binding.dart';
 import '../modules/ubah_password/views/ubah_password_view.dart';
 import '../modules/verifikasi_email/bindings/verifikasi_email_binding.dart';
 import '../modules/verifikasi_email/views/verifikasi_email_view.dart';
+
+import '../modules/surat_tugas_detail/controllers/surat_tugas_detail_controller.dart'
+    hide SuratTugasDetailView;
 
 part 'app_routes.dart';
 
@@ -248,8 +254,20 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.HRD_DETAIL_LEMBUR,
-      page: () =>  HrdDetailLemburView(lembur: Get.arguments,),
+      page: () => HrdDetailLemburView(
+        lembur: Get.arguments,
+      ),
       binding: HrdDetailLemburBinding(),
+    ),
+    GetPage(
+      name: _Paths.HRD_SURAT_TUGAS,
+      page: () => const HrdSuratTugasView(),
+      binding: HrdSuratTugasBinding(),
+    ),
+    GetPage(
+      name: _Paths.HRD_DETAIL_SURAT_TUGAS,
+      page: () =>  HrdDetailSuratTugasView(surat: Get.arguments),
+      binding: HrdDetailSuratTugasBinding(),
     ),
   ];
 }
