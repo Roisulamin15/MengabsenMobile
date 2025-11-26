@@ -272,28 +272,31 @@ class ApiService {
 
   // COMPLETE SURAT TUGAS
   static Future<Map<String, dynamic>> completeSuratTugas(
-      int id, String jamSelesai, File? fileTtd, String token) async {
-    final uri = Uri.parse('$baseUrl/surat_tugas/$id/complete');
-    final request = http.MultipartRequest("POST", uri);
+    int id, String jamSelesai, File? fileTtd, String token) async {
+  final uri = Uri.parse('$baseUrl/surat_tugas/$id/complete'); // perbaikan di sini
+  final request = http.MultipartRequest("POST", uri);
 
-    request.headers['Authorization'] = 'Bearer $token';
-    request.headers['Accept'] = 'application/json';
+  request.headers['Authorization'] = 'Bearer $token';
+  request.headers['Accept'] = 'application/json';
 
-    request.fields['jam_selesai'] = jamSelesai;
+  request.fields['jam_selesai'] = jamSelesai;
 
-    if (fileTtd != null && fileTtd.existsSync()) {
-      request.files.add(await http.MultipartFile.fromPath("file_ttd", fileTtd.path));
-    }
-
-    final streamed = await request.send();
-    final response = await http.Response.fromStream(streamed);
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception("Gagal complete surat tugas");
-    }
+  if (fileTtd != null && fileTtd.existsSync()) {
+    request.files.add(await http.MultipartFile.fromPath("file_ttd", fileTtd.path));
   }
+
+  final streamed = await request.send();
+  final response = await http.Response.fromStream(streamed);
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    return jsonDecode(response.body);
+  } else if (response.statusCode == 403) {
+    throw Exception("Akses ditolak: token mungkin invalid atau role tidak sesuai");
+  } else {
+    throw Exception("Gagal complete surat tugas: ${response.statusCode}");
+  }
+}
+
 
  // GET ALL SURAT TUGAS UNTUK HRD
 static Future<List<Map<String, dynamic>>> getSuratTugasHrd(String token) async {
