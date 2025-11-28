@@ -71,7 +71,7 @@ class CutiController extends GetxController {
 
     try {
       final url = Uri.parse(
-          "https://iotanesia-edu.web.id/api/outday"
+          "https://iotanesia-edu.web.id/cms/api/outday"
           );
       final response = await http.get(
         url,
@@ -151,7 +151,7 @@ class CutiController extends GetxController {
 
     try {
       final url = Uri.parse(
-          "https://iotanesia-edu.web.id/api/outday");
+          "https://iotanesia-edu.web.id/cms/api/outday");
       final response = await http.post(
         url,
         headers: {

@@ -50,28 +50,42 @@ class LoginEmailController extends GetxController {
         token.value = data['token'] ?? "";
 
         final user = data['user'] as Map<String, dynamic>? ?? {};
+
         final username = user['username'] ?? "Pengguna";
         final emailUser = user['email'] ?? email;
-        final role = (user['role'] ?? "karyawan").toString().toLowerCase();
-        final karyawanId = user['id']?.toString();
+
         final nik = user['nik']?.toString() ?? "";
 
-        // ✅ Simpan semua ke GetStorage
+        // ======================================================
+        // 🔥 PERBAIKAN UTAMA — SIMPAN ID & ROLE_ID
+        // ======================================================
+        storage.write("profile", user);
+        storage.write("karyawan_id", user['id']); // integer ✔
+
+        // 🔥 ambil role_id
+        final roleId = user['role_id'] ?? 1;
+        storage.write("role_id", roleId);
+
+        // 🔥 ambil role (WAJIB)
+        final role = user['role'] ?? "Karyawan";
+        storage.write("role", role);
+
+        print("ROLE DISIMPAN: $role | ROLE_ID: $roleId");
+
+
+        // ======================================================
+
+        // Simpan tambahan data login
         storage.write("username", username);
         storage.write("email", emailUser);
-        storage.write("role", role);
         storage.write("token", token.value);
-        storage.write("karyawan_id", karyawanId);
         storage.write("nik", nik);
 
-        print("✅ Login berhasil untuk $username");
+        print("✅ Login berhasil untuk $username | role_id = $roleId");
 
-        // 🔥 Ambil profil lengkap dari API
+        // Ambil profile lengkap
         final profile = await ApiService.getProfile(token.value);
         if (profile != null) {
-          print('✅ Profil lengkap diterima: $profile');
-
-          // Simpan data profil ke storage
           storage.write("nama_lengkap", profile['nama_lengkap']);
           storage.write("no_hp", profile['no_hp']);
           storage.write("nik", profile['nik']);
@@ -84,15 +98,13 @@ class LoginEmailController extends GetxController {
           storage.write("provinsi", profile['provinsi']);
 
           print("✅ Profil berhasil disimpan ke storage");
-        } else {
-          print('! Tidak ada profil dari API');
         }
 
-        // 🔄 Refresh HomeController
+        // Refresh HomeController
         Get.delete<HomeController>();
         Get.put(HomeController());
 
-        // ⏩ Arahkan ke HomeView
+        // Arahkan ke Home
         Get.offAll(() => const HomeView());
       } else {
         showErrorSnackbar("Login Gagal", data['message'] ?? "Terjadi kesalahan");

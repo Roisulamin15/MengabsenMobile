@@ -39,6 +39,7 @@ abstract class Routes {
   static const HRD_DETAIL_LEMBUR = _Paths.HRD_DETAIL_LEMBUR;
   static const HRD_SURAT_TUGAS = _Paths.HRD_SURAT_TUGAS;
   static const HRD_DETAIL_SURAT_TUGAS = _Paths.HRD_DETAIL_SURAT_TUGAS;
+  static const ABSENSI = _Paths.ABSENSI;
 }
 
 abstract class _Paths {
@@ -79,4 +80,5 @@ abstract class _Paths {
   static const HRD_DETAIL_LEMBUR = '/hrd-detail-lembur';
   static const HRD_SURAT_TUGAS = '/hrd-surat-tugas';
   static const HRD_DETAIL_SURAT_TUGAS = '/hrd-detail-surat-tugas';
+  static const ABSENSI = '/absensi';
 }

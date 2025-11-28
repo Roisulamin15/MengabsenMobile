@@ -24,7 +24,7 @@ class LemburFormView extends GetView<LemburFormController> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Text(
-        text,
+        text, 
         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
       ),
     );

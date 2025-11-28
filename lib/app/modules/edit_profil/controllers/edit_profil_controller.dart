@@ -29,7 +29,7 @@ class EditProfilController extends GetxController {
   var role = "".obs;
   var fotoProfil = "".obs;
 
-  final baseUrl = "https://iotanesia-edu.web.id/api";
+  final baseUrl = "https://iotanesia-edu.web.id/cms/api";
 
   @override
   void onInit() {

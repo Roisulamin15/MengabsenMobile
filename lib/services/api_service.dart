@@ -5,7 +5,7 @@ import 'package:path/path.dart' as p;
 
 class ApiService {
   static const String baseUrl =
-      "https://iotanesia-edu.web.id/api";
+      "https://iotanesia-edu.web.id/cms/api";
 
   // =========================================
   // LOGIN
@@ -360,4 +360,55 @@ static Future<List<Map<String, dynamic>>> getSuratTugasHrd(String token) async {
 
     return jsonDecode(response.body);
   }
+
+
+      // =========================================
+    // SUBMIT ABSENSI (UPLOAD SELFIE) - FIXED
+    // =========================================
+   static Future<Map<String, dynamic>> submitAbsensi({
+  required String jenis,         // WFO/WFH/WFA/Tidak Masuk
+  required String keterangan,    // Izin/Sakit/Cuti
+  required String deskripsi,
+  required String token,
+  required String tanggal,
+  required String waktu,
+  File? selfie,
+  required int karyawanId,       // ⚡ wajib
+  required int roleId,           // ⚡ TAMBAHKAN INI
+  required double latitude,   // 🔥 TARUH DI SINI
+  required double longitude,  // 🔥 TARUH DI SINI
+}) async {
+  final url = Uri.parse('$baseUrl/absensi');
+
+  var request = http.MultipartRequest("POST", url);
+
+  request.headers['Authorization'] = 'Bearer $token';
+  request.headers['Accept'] = 'application/json';
+
+  // Field yang diinputkan
+  request.fields['karyawan_id'] = karyawanId.toString();
+  request.fields['role_id'] = roleId.toString();    // 🔥 WAJIB UNTUK FIX ERROR
+  request.fields['status'] = jenis;
+  request.fields['keterangan'] = keterangan;
+  request.fields['deskripsi'] = deskripsi;
+  request.fields['tanggal'] = tanggal;
+  request.fields['jam'] = waktu;
+  request.fields['latitude'] = latitude.toString();
+request.fields['longitude'] = longitude.toString();
+
+
+  if (selfie != null && selfie.existsSync()) {
+    request.files.add(await http.MultipartFile.fromPath(
+      'foto',
+      selfie.path,
+      filename: p.basename(selfie.path),
+    ));
+  }
+
+  final streamed = await request.send();
+  final response = await http.Response.fromStream(streamed);
+
+  return jsonDecode(response.body);
+}
+
 }

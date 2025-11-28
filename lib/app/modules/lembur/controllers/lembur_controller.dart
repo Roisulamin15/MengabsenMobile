@@ -20,7 +20,7 @@ class LemburController extends GetxController {
   ];
   final yearList = ["2022", "2023", "2024", "2025", "2026"];
 
-  final String baseUrl = "https://iotanesia-edu.web.id/api/lembur";
+  final String baseUrl = "https://iotanesia-edu.web.id/cms/api/lembur";
 
   @override
   void onInit() {

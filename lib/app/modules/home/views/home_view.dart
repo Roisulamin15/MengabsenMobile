@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mengabsen/app/modules/absensi/bindings/absensi_binding.dart';
+import 'package:flutter_application_mengabsen/app/modules/absensi/views/absensi_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/edit_profil/controllers/edit_profil_controller.dart';
 import 'package:flutter_application_mengabsen/app/modules/edit_profil/views/edit_profil_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/hrd_cuti/bindings/hrd_cuti_binding.dart';
@@ -8,8 +10,6 @@ import 'package:flutter_application_mengabsen/app/modules/hrd_lembur/bindings/hr
 import 'package:flutter_application_mengabsen/app/modules/hrd_lembur/views/hrd_lembur_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/hrd_surat_tugas/bindings/hrd_surat_tugas_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/hrd_surat_tugas/views/hrd_surat_tugas_view.dart';
-import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
-import 'package:flutter_application_mengabsen/app/modules/karyawan_absen/views/karyawan_absen_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/lembur/bindings/lembur_binding.dart';
 import 'package:flutter_application_mengabsen/app/modules/lembur/views/lembur_view.dart';
 import 'package:flutter_application_mengabsen/app/modules/surat_tugas/bindings/surat_tugas_binding.dart';
@@ -211,7 +211,7 @@ class _HomeViewState extends State<HomeView> {
         backgroundColor: Colors.orange,
         child: const Icon(Icons.camera_alt),
         onPressed: () {
-          Get.to(() => const KaryawanAbsenView(), binding: KaryawanAbsenBinding());
+          Get.to(() => AbsensiView(), binding: AbsensiBinding());
         },
       ),
     );

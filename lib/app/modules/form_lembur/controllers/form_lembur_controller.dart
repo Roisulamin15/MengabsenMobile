@@ -25,7 +25,7 @@ class LemburFormController extends GetxController {
   var tanggalLembur = DateTime.now().obs;
   var isLoading = false.obs;
 
-  final String baseUrl = "https://iotanesia-edu.web.id/api/lembur";
+  final String baseUrl = "https://iotanesia-edu.web.id/cms/api/lembur";
 
   Future<void> pickTanggal(BuildContext context) async {
     DateTime? picked = await showDatePicker(

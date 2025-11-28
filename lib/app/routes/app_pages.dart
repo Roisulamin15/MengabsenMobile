@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 
 import '../modules/Landing_page/bindings/landing_page_binding.dart';
 import '../modules/Landing_page/views/landing_page_view.dart';
+import '../modules/absensi/bindings/absensi_binding.dart';
+import '../modules/absensi/views/absensi_view.dart';
 import '../modules/alamat_saya/bindings/alamat_saya_binding.dart';
 import '../modules/alamat_saya/views/alamat_saya_view.dart';
 import '../modules/cuti/bindings/cuti_binding.dart';
@@ -32,12 +34,6 @@ import '../modules/hrd_lembur/bindings/hrd_lembur_binding.dart';
 import '../modules/hrd_lembur/views/hrd_lembur_view.dart';
 import '../modules/hrd_surat_tugas/bindings/hrd_surat_tugas_binding.dart';
 import '../modules/hrd_surat_tugas/views/hrd_surat_tugas_view.dart';
-import '../modules/karyawan_absen/bindings/karyawan_absen_binding.dart';
-import '../modules/karyawan_absen/views/karyawan_absen_view.dart';
-import '../modules/karyawan_absen_wfa/bindings/karyawan_absen_wfa_binding.dart';
-import '../modules/karyawan_absen_wfa/views/karyawan_absen_wfa_view.dart';
-import '../modules/karyawan_absen_wfo_wfh/bindings/karyawan_absen_wfo_wfh_binding.dart';
-import '../modules/karyawan_absen_wfo_wfh/views/karyawan_absen_wfo_wfh_view.dart';
 import '../modules/lembur/bindings/lembur_binding.dart';
 import '../modules/lembur/views/lembur_view.dart';
 import '../modules/list_cuti/bindings/list_cuti_binding.dart';
@@ -60,8 +56,6 @@ import '../modules/reimbursement_form/bindings/reimbursement_form_binding.dart';
 import '../modules/reimbursement_form/views/reimbursement_form_view.dart';
 import '../modules/reimbursement_type/bindings/reimbursement_type_binding.dart';
 import '../modules/reimbursement_type/views/reimbursement_type_view.dart';
-import '../modules/riwayat_absen/bindings/riwayat_absen_binding.dart';
-import '../modules/riwayat_absen/views/riwayat_absen_view.dart';
 import '../modules/surat_tugas/bindings/surat_tugas_binding.dart';
 import '../modules/surat_tugas/views/surat_tugas_view.dart';
 import '../modules/surat_tugas_detail/bindings/surat_tugas_detail_binding.dart';
@@ -210,19 +204,6 @@ class AppPages {
       binding: HrdDetailCutiBinding(),
     ),
     GetPage(
-      name: _Paths.KARYAWAN_ABSEN,
-      page: () => const KaryawanAbsenView(),
-      binding: KaryawanAbsenBinding(),
-    ),
-    GetPage(
-      name: _Paths.KARYAWAN_ABSEN_WFO_WFH,
-      page: () {
-        final jenis = Get.arguments ?? "WFO";
-        return KaryawanAbsenWfoWfhView(jenis: jenis);
-      },
-      binding: KaryawanAbsenWfoWfhBinding(),
-    ),
-    GetPage(
       name: _Paths.LEMBUR,
       page: () => const LemburView(),
       binding: LemburBinding(),
@@ -236,16 +217,6 @@ class AppPages {
       name: _Paths.DETAIL_LEMBUR,
       page: () => DetailLemburView(),
       binding: DetailLemburBinding(),
-    ),
-    GetPage(
-      name: _Paths.KARYAWAN_ABSEN_WFA,
-      page: () => const KaryawanAbsenWfaView(),
-      binding: KaryawanAbsenBinding(), // pakai controller yang sama
-    ),
-    GetPage(
-      name: _Paths.RIWAYAT_ABSEN,
-      page: () => const RiwayatAbsenView(),
-      binding: RiwayatAbsenBinding(),
     ),
     GetPage(
       name: _Paths.HRD_LEMBUR,
@@ -266,8 +237,13 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.HRD_DETAIL_SURAT_TUGAS,
-      page: () =>  HrdDetailSuratTugasView(surat: Get.arguments),
+      page: () => HrdDetailSuratTugasView(surat: Get.arguments),
       binding: HrdDetailSuratTugasBinding(),
+    ),
+    GetPage(
+      name: _Paths.ABSENSI,
+      page: () => AbsensiView(),
+      binding: AbsensiBinding(),
     ),
   ];
 }
