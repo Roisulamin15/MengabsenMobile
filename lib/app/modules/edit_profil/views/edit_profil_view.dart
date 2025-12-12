@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../controllers/edit_profil_controller.dart';
 
@@ -21,97 +20,105 @@ class EditProfilView extends GetView<EditProfilController> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Header profil
-            Obx(() => Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      const CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Color.fromARGB(249, 183, 181, 181),
-                        child: Icon(Icons.person, color: Colors.white, size: 35),
+            Obx(
+              () => Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.orange,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 30,
+                      backgroundColor: Colors.grey,
+                      child: Icon(Icons.person, size: 35, color: Colors.white),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Halo, ${controller.username.value}",
+                            style: const TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                          Text(
+                            controller.role.value,
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Halo, ${controller.username.value}",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              controller.role.value,
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 20),
 
-            // Input field
             buildTextField("Nama Lengkap", "Nama sesuai identitas", controller.namaController),
-            buildTextField("Email", "Email aktifmu", controller.emailController,
-                keyboardType: TextInputType.emailAddress),
-            buildTextField("Nomor HP", "62 XXX XXX XXX", controller.hpController,
-                keyboardType: TextInputType.phone),
+            buildTextField("Email", "Email aktif", controller.emailController),
+            buildTextField("Nomor HP", "08xx", controller.hpController),
+
             buildDateField(context, "Tanggal Lahir", controller.tglLahirController),
+
             buildDropdown(
-              "Jenis Kelamin",
-              ["Laki-laki", "Perempuan", "Lainnya"],
-              controller.jenisKelamin.value,
-              (val) => controller.jenisKelamin.value = val,
+              label: "Jenis Kelamin",
+              items: ["Laki-laki", "Perempuan", "Lainnya"],
+              selectedValue: controller.jenisKelamin.value,
+              onChanged: (v) => controller.jenisKelamin.value = v,
             ),
 
             buildTextField(
-              "Nomor e-KTP/SIM (Opsional)",
-              "16 digit nomor KTP",
+              "Nomor e-KTP (Opsional)",
+              "16 digit",
               controller.ktpController,
               keyboardType: TextInputType.number,
               maxLength: 16,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
+
             buildTextField(
-              "Nomor ID Paspor (Opsional)",
-              "7 digit nomor paspor",
+              "Nomor Paspor (Opsional)",
+              "7 digit",
               controller.pasporController,
               keyboardType: TextInputType.number,
               maxLength: 7,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
 
-            buildDropdown("Kelurahan (Opsional)", ["Kelurahan 1", "Kelurahan 2"],
-                controller.kelurahan.value, (val) => controller.kelurahan.value = val),
-            buildDropdown("Kecamatan (Opsional)", ["Kecamatan 1", "Kecamatan 2"],
-                controller.kecamatan.value, (val) => controller.kecamatan.value = val),
-            buildDropdown("Kota (Opsional)", ["Kota 1", "Kota 2"],
-                controller.kota.value, (val) => controller.kota.value = val),
             buildDropdown(
-                "Provinsi (Opsional)",
-                ["Jawa Tengah", "Jawa Barat", "DKI Jakarta"],
-                controller.provinsi.value,
-                (val) => controller.provinsi.value = val),
-            buildTextField("Alamat (Opsional)", "Isi alamat lengkapmu", controller.alamatController,
-                maxLines: 3),
+              label: "Kelurahan (Opsional)",
+              items: ["Kelurahan 1", "Kelurahan 2"],
+              selectedValue: controller.kelurahan.value,
+              onChanged: (v) => controller.kelurahan.value = v,
+            ),
+
+            buildDropdown(
+              label: "Kecamatan (Opsional)",
+              items: ["Kecamatan 1", "Kecamatan 2"],
+              selectedValue: controller.kecamatan.value,
+              onChanged: (v) => controller.kecamatan.value = v,
+            ),
+
+            buildDropdown(
+              label: "Kota (Opsional)",
+              items: ["Kota 1", "Kota 2"],
+              selectedValue: controller.kota.value,
+              onChanged: (v) => controller.kota.value = v,
+            ),
+
+            buildDropdown(
+              label: "Provinsi (Opsional)",
+              items: ["DKI Jakarta", "Jawa Barat", "Jawa Tengah"],
+              selectedValue: controller.provinsi.value,
+              onChanged: (v) => controller.provinsi.value = v,
+            ),
+
+            buildTextField("Alamat", "Alamat lengkap", controller.alamatController, maxLines: 3),
 
             const SizedBox(height: 20),
 
-            // Tombol Simpan
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -119,14 +126,8 @@ class EditProfilView extends GetView<EditProfilController> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
                 ),
-                child: const Text(
-                  "Simpan",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+                child: const Text("Simpan", style: TextStyle(fontSize: 16)),
               ),
             ),
           ],
@@ -134,6 +135,10 @@ class EditProfilView extends GetView<EditProfilController> {
       ),
     );
   }
+
+  // ---------------------------
+  // UI COMPONENTS
+  // ---------------------------
 
   Widget buildTextField(
     String label,
@@ -172,31 +177,37 @@ class EditProfilView extends GetView<EditProfilController> {
           labelText: label,
           hintText: "Pilih tanggal",
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          suffixIcon: const Icon(Icons.calendar_today, size: 20),
+          suffixIcon: const Icon(Icons.calendar_today),
         ),
         onTap: () async {
           FocusScope.of(context).unfocus();
-          final DateTime? picked = await showDatePicker(
+          final picked = await showDatePicker(
             context: context,
-            initialDate: DateTime.tryParse(c.text) ?? DateTime(2000, 1, 1),
+            initialDate: DateTime.tryParse(c.text) ?? DateTime(2000),
             firstDate: DateTime(1900),
             lastDate: DateTime.now(),
           );
           if (picked != null) {
             c.text =
-                "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+                "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
           }
         },
       ),
     );
   }
 
-  Widget buildDropdown(
-      String label, List<String> items, String? value, Function(String?) onChanged) {
+  Widget buildDropdown({
+    required String label,
+    required List<String> items,
+    required String? selectedValue,
+    required Function(String?) onChanged,
+  }) {
+    final safeValue = items.contains(selectedValue) ? selectedValue : null;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: value?.isEmpty == true ? null : value,
+        value: safeValue,
         items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
         onChanged: onChanged,
         decoration: InputDecoration(

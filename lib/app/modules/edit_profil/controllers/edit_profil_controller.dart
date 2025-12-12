@@ -29,7 +29,7 @@ class EditProfilController extends GetxController {
   var role = "".obs;
   var fotoProfil = "".obs;
 
-  final baseUrl = "https://iotanesia-edu.web.id/cms/api";
+  final baseUrl = "https://cms.iotanesia-edu.web.id/api";
 
   @override
   void onInit() {
@@ -74,17 +74,15 @@ class EditProfilController extends GetxController {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final profile = data['profile'];
+
         if (profile != null) {
-          // tambahkan fallback email dari storage jika API tidak mengembalikan email
           profile['email'] ??= storage.read("email");
           _isiDataKeController(profile);
           _simpanKeStorage(profile);
         }
-      } else {
-        debugPrint("Gagal ambil profil (${response.statusCode}): ${response.body}");
       }
     } catch (e) {
-      debugPrint("Error ambil profil: $e");
+      debugPrint("Error ambil profile: $e");
     }
   }
 
@@ -98,7 +96,7 @@ class EditProfilController extends GetxController {
       final token = storage.read("token");
       if (token == null) {
         Get.back();
-        _showResultDialog(success: false, message: "Token tidak ditemukan. Silakan login ulang.");
+        _showResultDialog(success: false, message: "Token tidak ditemukan, silakan login ulang.");
         return;
       }
 
@@ -126,7 +124,7 @@ class EditProfilController extends GetxController {
         try {
           final parsed = DateTime.parse(tglLahirController.text);
           body["tanggal_lahir"] =
-              "${parsed.year.toString().padLeft(4, '0')}-${parsed.month.toString().padLeft(2, '0')}-${parsed.day.toString().padLeft(2, '0')}";
+              "${parsed.year}-${parsed.month.toString().padLeft(2, '0')}-${parsed.day.toString().padLeft(2, '0')}";
         } catch (_) {}
       }
 
@@ -142,9 +140,10 @@ class EditProfilController extends GetxController {
       Get.back();
 
       if (response.statusCode == 200) {
-        final res = jsonDecode(response.body);
-        final profile = res['profile'] ?? {};
-        profile['email'] ??= emailController.text; // pastikan email ikut tersimpan
+        final data = jsonDecode(response.body);
+        final profile = data['profile'] ?? {};
+
+        profile['email'] ??= emailController.text;
 
         _isiDataKeController(profile);
         _simpanKeStorage(profile);
@@ -155,12 +154,14 @@ class EditProfilController extends GetxController {
 
         _showResultDialog(
           success: true,
-          message: "Perubahan berhasil disimpan.\nKamu bisa mengganti lagi di edit profil.",
+          message: "Perubahan berhasil disimpan.",
         );
       } else {
-        final res = jsonDecode(response.body);
-        final msg = res['message'] ?? 'Terjadi kesalahan saat memperbarui profil.';
-        _showResultDialog(success: false, message: msg);
+        final data = jsonDecode(response.body);
+        _showResultDialog(
+          success: false,
+          message: data['message'] ?? "Gagal update data.",
+        );
       }
     } catch (e) {
       Get.back();
@@ -171,68 +172,35 @@ class EditProfilController extends GetxController {
   void _showResultDialog({required bool success, required String message}) {
     Get.dialog(
       Dialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: success ? const Color(0xFFFF8A00) : const Color(0xFFFF4D4D),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  success ? 'Data Berhasil Disimpan' : 'Terjadi Kesalahan',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
               Icon(
                 success ? Icons.check_circle : Icons.error,
-                size: 80,
+                size: 70,
                 color: success ? Colors.green : Colors.red,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
+              Text(
+                success ? "Berhasil" : "Gagal",
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: Colors.black54),
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Get.back();
-                    Get.offNamed('/profil');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        success ? const Color(0xFFFF8A00) : const Color(0xFFFF4D4D),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text(
-                    'OK',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => Get.offNamed('/profil'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: success ? Colors.orange : Colors.red,
                 ),
-              ),
+                child: const Text("OK", style: TextStyle(color: Colors.white)),
+              )
             ],
           ),
         ),
@@ -249,7 +217,7 @@ class EditProfilController extends GetxController {
 
   void _isiDataKeController(Map profile) {
     namaController.text = profile['nama_lengkap'] ?? "";
-    emailController.text = profile['email'] ?? storage.read("email") ?? "";
+    emailController.text = profile['email'] ?? "";
     hpController.text = profile['no_hp'] ?? "";
     tglLahirController.text = profile['tanggal_lahir'] ?? "";
     jenisKelamin.value = profile['jenis_kelamin'] ?? "";

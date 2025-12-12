@@ -5,7 +5,7 @@ import 'package:path/path.dart' as p;
 
 class ApiService {
   static const String baseUrl =
-      "https://iotanesia-edu.web.id/cms/api";
+      "https://cms.iotanesia-edu.web.id/api";
 
   // =========================================
   // LOGIN
@@ -154,7 +154,7 @@ class ApiService {
   static Future<Map<String, dynamic>> approveLembur(int id, String token) async {
     final url = Uri.parse('$baseUrl/lembur/$id/approve');
 
-    final response = await http.post(
+    final response = await http.put(
       url,
       headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
     );
@@ -172,7 +172,7 @@ class ApiService {
   static Future<Map<String, dynamic>> rejectLembur(int id, String token) async {
     final url = Uri.parse('$baseUrl/lembur/$id/reject');
 
-    final response = await http.post(
+    final response = await http.put(
       url,
       headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
     );

@@ -1,5 +1,5 @@
 // surat_tugas_detail_view.dart
-// Final Version — Fix Download PDF + Jam Selesai + Autorefresh
+// FINAL VERSION — DOWNLOAD PDF TERSIMPAN + AUTOREFRESH + FIX ALL
 
 import 'dart:async';
 import 'dart:io';
@@ -9,7 +9,8 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
 
 class SuratTugasDetailView extends StatefulWidget {
   const SuratTugasDetailView({super.key});
@@ -36,8 +37,8 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
   @override
   void initState() {
     super.initState();
-    final data = Get.arguments;
 
+    final data = Get.arguments;
     if (data is Map) {
       final id = _extractId(data);
       if (id != null) {
@@ -96,10 +97,8 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
       });
       _maybeFillJamFromSurat();
     } catch (e) {
-      print('fetchDetail error: $e');
-      setState(() {
-        loading = false;
-      });
+      print("Fetch detail error: $e");
+      setState(() => loading = false);
     }
   }
 
@@ -107,7 +106,6 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
     if (surat == null) return;
 
     dynamic raw = surat!['jam_selesai'];
-
     if (raw != null) {
       final s = raw.toString();
       if (s.isNotEmpty && s != '-' && s != 'null') {
@@ -115,8 +113,6 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
         if (parts.length >= 2) {
           jamSelesaiC.text =
               '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}';
-        } else {
-          jamSelesaiC.text = s;
         }
       }
     }
@@ -137,12 +133,13 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
 
       if (picked != null) {
         _stopAutoRefresh();
+
         setState(() {
           fileBukti = File(picked.path);
         });
       }
     } catch (e) {
-      Get.snackbar('Error', 'Gagal memilih gambar: $e');
+      Get.snackbar("Error", "Gagal memilih gambar: $e");
     } finally {
       isPicking = false;
     }
@@ -150,11 +147,11 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
 
   Future<void> submitComplete(int id) async {
     if (jamSelesaiC.text.isEmpty) {
-      Get.snackbar('Error', 'Jam selesai wajib diisi');
+      Get.snackbar("Error", "Jam selesai wajib diisi");
       return;
     }
     if (fileBukti == null) {
-      Get.snackbar('Error', 'Upload bukti wajib (gambar)');
+      Get.snackbar("Error", "Upload bukti wajib (gambar)");
       return;
     }
     if (isSubmitting) return;
@@ -164,6 +161,7 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
 
     try {
       final url = '${ApiService.baseUrl}/surat_tugas/$id/complete';
+
       final request = http.MultipartRequest('POST', Uri.parse(url))
         ..headers['Authorization'] = 'Bearer $token'
         ..headers['Accept'] = 'application/json'
@@ -171,7 +169,7 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
 
       final ext = fileBukti!.path.split('.').last;
       final filename =
-          'bukti_${DateTime.now().millisecondsSinceEpoch}.$ext';
+          "bukti_${DateTime.now().millisecondsSinceEpoch}.$ext";
 
       request.files.add(await http.MultipartFile.fromPath(
         'file_ttd',
@@ -180,27 +178,86 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
       ));
 
       final streamed = await request.send();
-      final resp = await streamed.stream.bytesToString();
+      final body = await streamed.stream.bytesToString();
 
       if (streamed.statusCode == 200 || streamed.statusCode == 201) {
-        Get.snackbar('Berhasil', 'Surat tugas berhasil diselesaikan',
-            backgroundColor: Colors.green, colorText: Colors.white);
+        Get.snackbar(
+          "Berhasil",
+          "Surat tugas diselesaikan",
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
 
         await fetchDetail(id);
-        setState(() => fileBukti = null);
+        fileBukti = null;
         _startAutoRefresh(id);
       } else {
-        Get.snackbar('Gagal', resp,
-            backgroundColor: Colors.red, colorText: Colors.white);
+        Get.snackbar(
+          "Gagal",
+          body,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
-      Get.snackbar('Error', 'Gagal mengirim data: $e',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        "Error",
+        "Gagal mengirim: $e",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isSubmitting = false;
       setState(() {});
     }
   }
+
+  /// =============================
+  ///     DOWNLOAD & SAVE PDF
+  /// =============================
+  Future<void> downloadPDF(int id) async {
+  try {
+    final url = "${ApiService.baseUrl}/surat_tugas/$id/pdf";
+
+    print("Requesting PDF: $url");
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    print("Status Code: ${response.statusCode}");
+    print("Body: ${response.body}");
+
+    if (response.statusCode != 200) {
+      Get.snackbar(
+        "Gagal",
+        "Server belum menyediakan PDF. (${response.statusCode})",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    final bytes = response.bodyBytes;
+    final dir = await getApplicationDocumentsDirectory();
+    final filePath = "${dir.path}/surat_tugas_$id.pdf";
+    final file = File(filePath);
+
+    await file.writeAsBytes(bytes);
+
+    await OpenFile.open(filePath);
+
+  } catch (e) {
+    Get.snackbar(
+      "Error",
+      "Gagal download PDF: $e",
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+  }
+}
+
 
   Widget label(String t) => Padding(
         padding: const EdgeInsets.only(bottom: 2),
@@ -217,18 +274,19 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Pengajuan Surat Tugas')),
-        body: const Center(child: CircularProgressIndicator()),
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (surat == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Pengajuan Surat Tugas')),
-        body: const Center(child: Text('Data tidak ditemukan')),
+      return const Scaffold(
+        body: Center(child: Text("Data tidak ditemukan")),
       );
     }
+
+    final id = surat!['id'];
+    final status = surat!['status'] ?? '-';
 
     final nama = surat!['karyawan']?['nama_lengkap'] ?? '-';
     final nik = surat!['karyawan']?['nik'] ?? '-';
@@ -240,35 +298,26 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
     final tujuan = surat!['tujuan_kunjungan'] ?? '-';
     final detail = surat!['detail_kunjungan'] ?? '-';
 
-    final fileSuratFull = (surat!['file_ttd_url'] ?? '-') as String;
-    final fileSurat = fileSuratFull.split('/').last;
-
-    /// FIX: URL download sesuai backend
-    final id = surat!['id'];
-    final pdfUrl = '${ApiService.baseUrl}/api/surat_tugas/$id/pdf';
-
-    final status = surat!['status'] ?? '-';
-
     final jamTampil = jamSelesaiC.text.isNotEmpty
         ? jamSelesaiC.text
         : (surat!['jam_selesai']?.toString() ?? '-');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Pengajuan Surat Tugas')),
+      appBar: AppBar(title: const Text("Pengajuan Surat Tugas")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            label('Nama Lengkap'),
+            label("Nama Lengkap"),
             textItem(nama),
             const SizedBox(height: 12),
 
-            label('NIK'),
+            label("NIK"),
             textItem(nik),
             const SizedBox(height: 12),
 
-            label('Tanggal'),
+            label("Tanggal Pengajuan"),
             textItem(tanggal),
             const SizedBox(height: 12),
 
@@ -278,7 +327,7 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      label('Jam Pertemuan'),
+                      label("Jam Pertemuan"),
                       textItem(jamPertemuan),
                     ],
                   ),
@@ -287,8 +336,8 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      label('Jam Selesai*'),
-                      status == 'disetujui'
+                      label("Jam Selesai"),
+                      status == "disetujui"
                           ? GestureDetector(
                               onTap: () async {
                                 _stopAutoRefresh();
@@ -298,7 +347,7 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
                                 );
                                 if (picked != null) {
                                   jamSelesaiC.text =
-                                      '${picked.hour}:${picked.minute.toString().padLeft(2, '0')}';
+                                      "${picked.hour}:${picked.minute.toString().padLeft(2, '0')}";
                                   setState(() {});
                                 }
                               },
@@ -317,77 +366,55 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
 
             const SizedBox(height: 12),
 
-            label('Bertemu Dengan'),
+            label("Bertemu Dengan"),
             textItem(bertemu),
             const SizedBox(height: 12),
 
-            label('Perusahaan / Instansi'),
+            label("Perusahaan / Instansi"),
             textItem(perusahaan),
             const SizedBox(height: 12),
 
-            label('Bersama Dengan'),
+            label("Bersama Dengan"),
             textItem(bersama),
             const SizedBox(height: 12),
 
-            label('Tujuan Kegiatan'),
+            label("Tujuan Kegiatan"),
             textItem(tujuan),
             const SizedBox(height: 12),
 
-            label('Detail Kegiatan'),
+            label("Detail Kegiatan"),
             textItem(detail),
             const SizedBox(height: 12),
 
-            label('Bukti Tanda Tangan Client'),
-            textItem(fileSurat),
+            const SizedBox(height: 12),
 
-            const SizedBox(height: 10),
-
+            // ===========================
+            // BUTTON DOWNLOAD PDF (FIXED)
+            // ===========================
             OutlinedButton.icon(
-              onPressed: () async {
-                final url = Uri.parse(pdfUrl);
-
-                if (!await launchUrl(
-                  url,
-                  mode: LaunchMode.externalApplication,
-                )) {
-                  Get.snackbar(
-                    'Error',
-                    'Gagal membuka PDF',
-                    backgroundColor: Colors.red,
-                    colorText: Colors.white,
-                  );
-                }
-              },
+              onPressed: () => downloadPDF(id),
               icon: const Icon(Icons.picture_as_pdf, color: Colors.red),
               label: const Text(
-                'Download Form Surat Tugas',
+                "Download Form Surat Tugas",
                 style: TextStyle(color: Colors.red),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.red),
-                padding: const EdgeInsets.symmetric(vertical: 14),
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 25),
 
-            if (status == 'disetujui') ...[
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed:
-                      (isPicking || isSubmitting) ? null : pilihBukti,
-                  icon: const Icon(Icons.upload_file, color: Colors.orange),
-                  label: Text(
-                    fileBukti == null
-                        ? 'Upload Bukti (Gambar JPG/PNG)'
-                        : fileBukti!.path.split('/').last,
-                    style: const TextStyle(color: Colors.orange),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.orange),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
+            if (status == "disetujui") ...[
+              OutlinedButton.icon(
+                onPressed:
+                    (isPicking || isSubmitting) ? null : pilihBukti,
+                icon: const Icon(Icons.upload_file, color: Colors.orange),
+                label: Text(
+                  fileBukti == null
+                      ? "Upload Bukti (Gambar)"
+                      : fileBukti!.path.split("/").last,
+                  style: const TextStyle(color: Colors.orange),
                 ),
               ),
 
@@ -400,37 +427,33 @@ class _SuratTugasDetailViewState extends State<SuratTugasDetailView> {
                     child: Image.file(
                       fileBukti!,
                       fit: BoxFit.cover,
-                      width: double.infinity,
                     ),
                   ),
                 ),
               ],
 
-              const SizedBox(height: 25),
+              const SizedBox(height: 20),
 
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed:
-                      (isSubmitting || isPicking) ? null : () => submitComplete(id),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: isSubmitting
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Kirim',
-                          style: TextStyle(color: Colors.white),
-                        ),
+              ElevatedButton(
+                onPressed: (isSubmitting || isPicking)
+                    ? null
+                    : () => submitComplete(id),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
                 ),
+                child: isSubmitting
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        "Kirim",
+                        style: TextStyle(color: Colors.white),
+                      ),
               ),
             ]
           ],
