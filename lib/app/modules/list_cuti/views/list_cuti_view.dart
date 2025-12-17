@@ -1,142 +1,195 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_mengabsen/app/modules/cuti/views/cuti_view.dart';
-import 'package:flutter_application_mengabsen/app/modules/detail_cuti/views/detail_cuti_view.dart';
-import 'package:flutter_application_mengabsen/app/modules/list_cuti/controllers/list_cuti_controller.dart';
 import 'package:get/get.dart';
 
+import '../../cuti/views/cuti_view.dart';
+import '../../detail_cuti/views/detail_cuti_view.dart';
+import '../controllers/list_cuti_controller.dart';
+
 class ListCutiView extends StatelessWidget {
-  ListCutiView({super.key});
+  const ListCutiView({super.key});
 
-  final ListCutiController listController = Get.find<ListCutiController>();
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case "disetujui":
-        return Colors.green;
-      case "ditolak":
-        return Colors.red;
-      default:
-        return Colors.orange;
-    }
+  Color _statusColor(String status) {
+    final s = status.toLowerCase();
+    if (s.contains('setuju')) return Colors.green;
+    if (s.contains('tolak')) return Colors.red;
+    return Colors.orange;
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<ListCutiController>();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Cuti", style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
+        title: const Text(
+          "Cuti",
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 12),
           const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "List Cuti",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              "List Cuti",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
+
           Expanded(
             child: Obx(() {
-              final data = listController.cutiList;
-              if (listController.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
+              if (controller.isLoading.value) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               }
 
-              if (data.isEmpty) {
+              if (controller.cutiList.isEmpty) {
                 return const Center(
                   child: Text(
                     "Belum ada pengajuan cuti",
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(color: Colors.grey),
                   ),
                 );
               }
 
               return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: data.length,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: controller.cutiList.length,
                 itemBuilder: (context, index) {
-                  final item = data[index];
-                  String status = (item['status'] ?? 'Menunggu Persetujuan').toString();
+                  final item =
+                      controller.cutiList[index];
 
-                  // tampilkan nama jika tersedia
-                  final nama = item['karyawan'] != null
-                      ? (item['karyawan']['nama_lengkap'] ?? item['karyawan']['nama'] ?? '')
-                      : (item['nama'] ?? '');
+                  final status =
+                      (item['status'] ?? 'Menunggu')
+                          .toString();
+                  final jenis =
+                      (item['jenis_izin'] ?? 'Cuti')
+                          .toString();
+                  final tanggal =
+                      (item['tanggal_pengajuan'] ?? '-')
+                          .toString();
 
-                  final jenis = item['jenis_izin'] ?? '-';
-                  final tanggal = item['tanggal_pengajuan'] ?? '-';
+                  final color = _statusColor(status);
 
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    elevation: 2,
-                    child: ListTile(
-                      onTap: () {
-                        // kirim item ke detail sebagai argumen
-                        Get.to(
-                          () => DetailCutiView(),
-                          arguments: item,
-                        );
-                      },
-                      leading: const Icon(Icons.description, color: Colors.orange),
-                      title: Text(
-                        jenis,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                  return InkWell(
+                    onTap: () async {
+                      await Get.to(
+                        () => DetailCutiView(),
+                        arguments: item,
+                      );
+                      controller.fetchCuti(); // refresh manual
+                    },
+                    child: Container(
+                      margin:
+                          const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius:
+                            BorderRadius.circular(12),
                       ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
+                        mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
                         children: [
-                          const SizedBox(height: 4),
-                          Text(
-                            status,
-                            style: TextStyle(
-                              color: _getStatusColor(status),
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                jenis,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight:
+                                      FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Container(
+                                padding:
+                                    const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius:
+                                      BorderRadius.circular(
+                                          6),
+                                  border: Border.all(
+                                      color: color),
+                                ),
+                                child: Text(
+                                  status,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: color,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            "Tanggal: $tanggal",
-                            style: const TextStyle(color: Colors.grey),
+                          Row(
+                            children: [
+                              Text(
+                                tanggal,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 14,
+                                color: Colors.grey,
+                              ),
+                            ],
                           ),
-                          if (nama.isNotEmpty) const SizedBox(height: 2),
-                          if (nama.isNotEmpty)
-                            Text(
-                              nama,
-                              style: const TextStyle(color: Colors.grey),
-                            ),
                         ],
                       ),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
                     ),
                   );
                 },
               );
             }),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
+        ],
+      ),
+
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 46,
             child: ElevatedButton(
-              onPressed: () => Get.to(() => const CutiView()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
+              onPressed: () async {
+                await Get.to(() => const CutiView());
+                controller.fetchCuti(); // refresh setelah submit
+              },
               child: const Text(
                 "Ajukan Cuti",
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

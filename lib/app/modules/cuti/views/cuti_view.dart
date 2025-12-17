@@ -31,7 +31,8 @@ class CutiView extends GetView<CutiController> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(CutiController());
+    // ❌ JANGAN Get.put DI SINI
+    // controller sudah otomatis tersedia dari GetView
 
     return Scaffold(
       appBar: AppBar(
@@ -66,8 +67,10 @@ class CutiView extends GetView<CutiController> {
                             ? null
                             : controller.selectedJabatan.value,
                         items: controller.jabatanList
-                            .map((e) =>
-                                DropdownMenuItem(value: e, child: Text(e)))
+                            .map((e) => DropdownMenuItem(
+                                  value: e,
+                                  child: Text(e),
+                                ))
                             .toList(),
                         onChanged: (val) =>
                             controller.selectedJabatan.value = val ?? "",
@@ -81,8 +84,10 @@ class CutiView extends GetView<CutiController> {
                             ? null
                             : controller.selectedIzin.value,
                         items: controller.izinList
-                            .map((e) =>
-                                DropdownMenuItem(value: e, child: Text(e)))
+                            .map((e) => DropdownMenuItem(
+                                  value: e,
+                                  child: Text(e),
+                                ))
                             .toList(),
                         onChanged: (val) =>
                             controller.selectedIzin.value = val ?? "",
@@ -95,14 +100,17 @@ class CutiView extends GetView<CutiController> {
                         readOnly: true,
                         decoration: formDecoration(
                           hint:
-                              "${controller.tanggalPengajuan.value.toLocal()}".split(' ')[0],
+                              "${controller.tanggalPengajuan.value.toLocal()}"
+                                  .split(' ')[0],
                         ).copyWith(
                           suffixIcon: IconButton(
-                            icon: const Icon(Icons.calendar_today, size: 18),
+                            icon:
+                                const Icon(Icons.calendar_today, size: 18),
                             onPressed: () async {
                               DateTime? picked = await showDatePicker(
                                 context: context,
-                                initialDate: controller.tanggalPengajuan.value,
+                                initialDate:
+                                    controller.tanggalPengajuan.value,
                                 firstDate: DateTime(2000),
                                 lastDate: DateTime(2100),
                               );
@@ -123,13 +131,15 @@ class CutiView extends GetView<CutiController> {
                               readOnly: true,
                               decoration: formDecoration(
                                 hint:
-                                    "${controller.tanggalMulai.value.toLocal()}".split(' ')[0],
+                                    "${controller.tanggalMulai.value.toLocal()}"
+                                        .split(' ')[0],
                               ).copyWith(
                                 suffixIcon: IconButton(
-                                  icon:
-                                      const Icon(Icons.calendar_today, size: 18),
+                                  icon: const Icon(Icons.calendar_today,
+                                      size: 18),
                                   onPressed: () async {
-                                    DateTime? picked = await showDatePicker(
+                                    DateTime? picked =
+                                        await showDatePicker(
                                       context: context,
                                       initialDate:
                                           controller.tanggalMulai.value,
@@ -137,7 +147,8 @@ class CutiView extends GetView<CutiController> {
                                       lastDate: DateTime(2100),
                                     );
                                     if (picked != null) {
-                                      controller.tanggalMulai.value = picked;
+                                      controller.tanggalMulai.value =
+                                          picked;
                                     }
                                   },
                                 ),
@@ -152,13 +163,15 @@ class CutiView extends GetView<CutiController> {
                               readOnly: true,
                               decoration: formDecoration(
                                 hint:
-                                    "${controller.tanggalSelesai.value.toLocal()}".split(' ')[0],
+                                    "${controller.tanggalSelesai.value.toLocal()}"
+                                        .split(' ')[0],
                               ).copyWith(
                                 suffixIcon: IconButton(
-                                  icon:
-                                      const Icon(Icons.calendar_today, size: 18),
+                                  icon: const Icon(Icons.calendar_today,
+                                      size: 18),
                                   onPressed: () async {
-                                    DateTime? picked = await showDatePicker(
+                                    DateTime? picked =
+                                        await showDatePicker(
                                       context: context,
                                       initialDate:
                                           controller.tanggalSelesai.value,
@@ -166,7 +179,8 @@ class CutiView extends GetView<CutiController> {
                                       lastDate: DateTime(2100),
                                     );
                                     if (picked != null) {
-                                      controller.tanggalSelesai.value = picked;
+                                      controller.tanggalSelesai.value =
+                                          picked;
                                     }
                                   },
                                 ),
@@ -181,7 +195,8 @@ class CutiView extends GetView<CutiController> {
                   TextField(
                     controller: controller.alasanController,
                     maxLines: 2,
-                    decoration: formDecoration(hint: "Masukkan alasan cuti"),
+                    decoration:
+                        formDecoration(hint: "Masukkan alasan cuti"),
                   ),
                   const SizedBox(height: 16),
 
@@ -193,11 +208,13 @@ class CutiView extends GetView<CutiController> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding:
+                            const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: const Text(
                         "Kirim",
-                        style: TextStyle(color: Colors.white, fontSize: 15),
+                        style: TextStyle(
+                            color: Colors.white, fontSize: 15),
                       ),
                     ),
                   )

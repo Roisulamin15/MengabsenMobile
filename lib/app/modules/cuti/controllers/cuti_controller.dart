@@ -55,14 +55,33 @@ class CutiController extends GetxController {
     return int.tryParse(raw.toString()) ?? 0;
   }
 
-  /// Ambil list cuti dari server (hanya milik karyawan ini)
+  // ======================================================
+  // 🔥 PERBAIKAN UTAMA: ISI DATA DI onReady()
+  // ======================================================
+  @override
+  void onReady() {
+    super.onReady();
+
+    final nama = box.read("nama_lengkap");
+    final nik = box.read("nik");
+
+    if (nama != null && nama.toString().isNotEmpty) {
+      namaController.text = nama;
+    }
+
+    if (nik != null && nik.toString().isNotEmpty) {
+      nikController.text = nik.toString();
+    }
+
+    fetchCuti();
+  }
+  // ======================================================
+
   Future<void> fetchCuti() async {
     final token = box.read('token') ?? '';
     final karyawanId = _readKaryawanId();
 
     if (token.isEmpty || karyawanId == 0) {
-      Get.snackbar("Error", "Token atau ID karyawan tidak ditemukan",
-          backgroundColor: Colors.red, colorText: Colors.white);
       cutiList.clear();
       return;
     }
@@ -70,9 +89,9 @@ class CutiController extends GetxController {
     isLoading.value = true;
 
     try {
-      final url = Uri.parse(
-          "https://cms.iotanesia-edu.web.id/api/outday"
-          );
+      final url =
+          Uri.parse("https://cmsiotanesia-edu.web.id/api/outday");
+
       final response = await http.get(
         url,
         headers: {
@@ -84,47 +103,41 @@ class CutiController extends GetxController {
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
 
-        // Ambil list dari berbagai bentuk response
         List<dynamic> raw = [];
-        if (result is List) raw = result;
-        else if (result is Map && result['data'] is List) raw = result['data'];
-        else raw = [];
+        if (result is List) {
+          raw = result;
+        } else if (result is Map && result['data'] is List) {
+          raw = result['data'];
+        }
 
-        // Filter (double-safety) berdasarkan karyawan_id
-        final filtered = raw.where((e) {
-          try {
-            return e['karyawan_id'].toString() == karyawanId.toString();
-          } catch (_) {
-            return false;
-          }
-        }).map<Map<String, dynamic>>((e) {
-          if (e is Map<String, dynamic>) return e;
-          return Map<String, dynamic>.from(e as Map);
-        }).toList();
-
-        cutiList.value = filtered;
+        cutiList.value = raw
+            .where((e) =>
+                e['karyawan_id'].toString() ==
+                karyawanId.toString())
+            .map<Map<String, dynamic>>(
+                (e) => Map<String, dynamic>.from(e))
+            .toList();
       } else {
         cutiList.clear();
-        Get.snackbar("Error", "Gagal memuat data cuti (${response.statusCode})",
-            backgroundColor: Colors.red, colorText: Colors.white);
       }
-    } catch (e) {
+    } catch (_) {
       cutiList.clear();
-      Get.snackbar("Error", "Terjadi kesalahan: $e",
-          backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Kirim data cuti ke server
   Future<void> kirimCutiKeServer(BuildContext context) async {
     final token = box.read('token') ?? '';
     final karyawanId = _readKaryawanId();
 
     if (token.isEmpty || karyawanId == 0) {
-      _showPopup(context, false, "Cuti Gagal Diajukan",
-          "Token atau ID karyawan tidak ditemukan. Silakan login ulang.");
+      _showPopup(
+        context,
+        false,
+        "Cuti Gagal",
+        "Silakan login ulang",
+      );
       return;
     }
 
@@ -132,13 +145,17 @@ class CutiController extends GetxController {
         nikController.text.isEmpty ||
         selectedIzin.value.isEmpty ||
         selectedJabatan.value.isEmpty) {
-      _showPopup(context, false, "Cuti Gagal Diajukan",
-          "Data belum lengkap. Silakan isi semua field.");
+      _showPopup(
+        context,
+        false,
+        "Cuti Gagal",
+        "Data belum lengkap",
+      );
       return;
     }
 
     final data = {
-      "karyawan_id": karyawanId, // INT (penting)
+      "karyawan_id": karyawanId,
       "jabatan": selectedJabatan.value,
       "jenis_izin": selectedIzin.value,
       "tanggal_pengajuan": formatTanggal(tanggalPengajuan.value),
@@ -150,8 +167,9 @@ class CutiController extends GetxController {
     isLoading.value = true;
 
     try {
-      final url = Uri.parse(
-          "https://iotanesia-edu.web.id/cms/api/outday");
+      final url =
+          Uri.parse("https://iotanesia-edu.web.id/cms/api/outday");
+
       final response = await http.post(
         url,
         headers: {
@@ -162,131 +180,174 @@ class CutiController extends GetxController {
         body: json.encode(data),
       );
 
-      final result = json.decode(response.body);
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        // update local list view utama (ListCutiController) jika ada
+      if (response.statusCode == 201 ||
+          response.statusCode == 200) {
         try {
-          final listController = Get.find<ListCutiController>();
-          final localItem = {
-            // bentuk lokal agar konsisten dengan server response minimal
-            "id": result is Map && result['data']?['id'] != null
-                ? result['data']['id']
-                : DateTime.now().millisecondsSinceEpoch,
-            "karyawan_id": karyawanId,
-            "jabatan": selectedJabatan.value,
-            "jenis_izin": selectedIzin.value,
-            "tanggal_pengajuan": formatTanggal(tanggalPengajuan.value),
-            "tanggal_izin": formatTanggal(tanggalMulai.value),
-            "tanggal_selesai": formatTanggal(tanggalSelesai.value),
-            "alasan": alasanController.text,
-            "status": result is Map && result['data']?['status'] != null
-                ? result['data']['status']
-                : "Menunggu Persetujuan",
-            // tambahkan subobject karyawan agar UI bisa menampilkan nama & nik
+          Get.find<ListCutiController>().tambahCuti({
+            ...data,
+            "status": "Menunggu Persetujuan",
             "karyawan": {
               "id": karyawanId,
               "nama_lengkap": namaController.text,
               "nik": nikController.text,
-               "jabatan": selectedJabatan.value,
+              "jabatan": selectedJabatan.value,
             }
-          };
-          listController.tambahCuti(localItem);
-        } catch (_) {
-          // jika ListCutiController tidak ditemukan, skip
-        }
+          });
+        } catch (_) {}
 
-        // juga tambahkan ke cutiList lokal di halaman pengajuan (opsional)
-        cutiList.insert(
-            0,
-            {
-              ...data,
-              "status": "Menunggu Persetujuan",
-              "karyawan": {
-                "id": karyawanId,
-                "nama_lengkap": namaController.text,
-                "nik": nikController.text,
-              }
-            });
+        await fetchCuti();
 
-        await fetchCuti(); // refresh dari server (lebih authoritative)
-        _showPopup(context, true, "Cuti Berhasil Diajukan",
-            "Permintaan berhasil diajukan. Silahkan menunggu konfirmasi dari HRD.");
+        _showPopup(
+          context,
+          true,
+          "Berhasil",
+          "Cuti berhasil diajukan",
+        );
       } else {
-        _showPopup(context, false, "Cuti Gagal Diajukan",
-            result is Map ? (result['message'] ?? "Gagal mengirim data.") : "Gagal mengirim data.");
+        _showPopup(
+          context,
+          false,
+          "Gagal",
+          "Gagal mengirim data",
+        );
       }
     } catch (e) {
-      _showPopup(context, false, "Cuti Gagal Diajukan",
-          "Terjadi kesalahan koneksi: $e");
+      _showPopup(
+        context,
+        false,
+        "Gagal",
+        e.toString(),
+      );
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Pop-up konfirmasi
   void _showPopup(
-      BuildContext context, bool success, String title, String message) {
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        content: Column(
+  BuildContext context,
+  bool success,
+  String title,
+  String message,
+) {
+  Get.dialog(
+    Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+
+            // ================= HEADER =================
             Container(
-              padding: const EdgeInsets.all(16),
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: success ? Colors.orange : Colors.red,
-                borderRadius: BorderRadius.circular(8),
+                color: success
+                    ? const Color(0xFFF2994A)
+                    : const Color(0xFFE74C3C),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
               ),
-              child: Center(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
+              child: Text(
+                success ? "Cuti Berhasil Diajukan" : "Cuti Gagal Diajukan",
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            Icon(
-              success ? Icons.check_circle : Icons.error,
-              color: success ? Colors.green : Colors.red,
-              size: 64,
+
+            const SizedBox(height: 32),
+
+            // ================= ICON =================
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    color: success
+                        ? const Color(0xFFE6F7EF)
+                        : const Color(0xFFFDECEA),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                Icon(
+                  success ? Icons.check_circle : Icons.warning_rounded,
+                  size: 64,
+                  color: success
+                      ? const Color(0xFF27AE60)
+                      : const Color(0xFFE74C3C),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14),
-            ),
+
             const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                minimumSize: const Size(100, 40),
+
+            // ================= MESSAGE =================
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                success
+                    ? "Permintaan berhasil diajukan.\nSilakan menunggu konfirmasi dari HRD."
+                    : "Permintaan gagal diajukan karena data tidak lengkap.\nSilakan coba lagi.",
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF9B9B9B),
+                  height: 1.5,
+                ),
               ),
-              onPressed: () {
-                Get.back(); // tutup popup
-                if (success) {
-                  fetchCuti();
-                  Get.back(); // balik ke ListCutiView
-                }
-              },
-              child: const Text("OK",
-                  style: TextStyle(color: Colors.white, fontSize: 16)),
-            )
+            ),
+
+            const SizedBox(height: 28),
+
+            // ================= BUTTON =================
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: SizedBox(
+                width: 180,
+                height: 44,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF2994A),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: () {
+                    Get.back();
+                    if (success) Get.back();
+                  },
+                  child: const Text(
+                    "OK",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
-      barrierDismissible: false,
-    );
-  }
+    ),
+    barrierDismissible: false,
+  );
+}
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchCuti();
-  }
 
   @override
   void onClose() {
