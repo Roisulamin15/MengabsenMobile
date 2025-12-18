@@ -12,8 +12,8 @@ class HrdDetailLemburView extends StatelessWidget {
     final controller = Get.find<HrdLemburController>();
 
     final nama = lembur['karyawan']?['nama_lengkap']
-    ?? controller.karyawanMap[lembur['karyawan_id']]
-    ?? '-';
+        ?? controller.karyawanMap[lembur['karyawan_id']]
+        ?? '-';
     final jabatan = lembur['jabatan'] ?? '-';
     final tanggal = lembur['tanggal_lembur'] ?? lembur['tanggal'] ?? '-';
     final mulai = lembur['jam_mulai'] ?? '-';
@@ -64,7 +64,10 @@ class HrdDetailLemburView extends StatelessWidget {
                           backgroundColor: Colors.red,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        child: const Text("Tolak", style: TextStyle(fontSize: 16)),
+                        child: const Text(
+                          "Tolak",
+                          style: TextStyle(fontSize: 16),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -81,7 +84,10 @@ class HrdDetailLemburView extends StatelessWidget {
                           backgroundColor: Colors.green,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        child: const Text("Setujui", style: TextStyle(fontSize: 16)),
+                        child: const Text(
+                          "Setujui",
+                          style: TextStyle(fontSize: 16),
+                        ),
                       ),
                     ),
                   ],
@@ -91,7 +97,9 @@ class HrdDetailLemburView extends StatelessWidget {
                   child: Text(
                     "Status: $status",
                     style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
             ],
@@ -107,18 +115,28 @@ class HrdDetailLemburView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style:
-                  const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(value, style: const TextStyle(fontSize: 15)),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 15),
+          ),
         ],
       ),
     );
   }
 
-  void _showConfirmDialog(BuildContext context,
-      {required bool isApprove, required VoidCallback onConfirm}) {
+  void _showConfirmDialog(
+    BuildContext context, {
+    required bool isApprove,
+    required Future<void> Function() onConfirm,
+  }) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -167,19 +185,24 @@ class HrdDetailLemburView extends StatelessWidget {
                         : "Pengajuan lembur telah ditolak.\nNotifikasi akan dikirim ke staff.",
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                        fontSize: 14, color: Colors.black87, height: 1.4),
+                      fontSize: 14,
+                      color: Colors.black87,
+                      height: 1.4,
+                    ),
                   ),
                   const SizedBox(height: 30),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.of(context).pop(); // tutup dialog
-                      onConfirm(); // jalankan approve/reject
-                      Get.offAllNamed('/hrd-lembur'); // kembali ke halaman HRD Lembur
+                      await onConfirm(); // approve / reject
+                      // ❌ TIDAK ADA Get.offAllNamed
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange.shade700,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 10),
+                        horizontal: 40,
+                        vertical: 10,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),

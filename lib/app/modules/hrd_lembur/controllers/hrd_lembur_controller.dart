@@ -20,60 +20,77 @@ class HrdLemburController extends GetxController {
     await fetchData();
   }
 
+  // ======================
+  // FETCH KARYAWAN
+  // ======================
   Future<void> fetchKaryawan() async {
     try {
       final token = box.read("token") ?? "";
       if (token.isEmpty) return;
+
       final data = await ApiService.getAllKaryawan(token);
       karyawanMap.clear();
+
       for (var k in data) {
         final id = int.tryParse(k['id']?.toString() ?? '') ?? 0;
-        final nama = (k['nama_lengkap'] ?? k['nama'] ?? k['name'])?.toString() ?? '-';
-        if (id != 0) karyawanMap[id] = nama;
+        final nama = (k['nama_lengkap'] ??
+                k['nama'] ??
+                k['name'])
+            ?.toString() ??
+            '-';
+
+        if (id != 0) {
+          karyawanMap[id] = nama;
+        }
       }
     } catch (e) {
       print("❌ ERROR FETCH KARYAWAN: $e");
     }
   }
 
+  // ======================
+  // FETCH DATA LEMBUR HRD
+  // ======================
   Future<void> fetchData() async {
     isLoading(true);
     try {
       final token = box.read("token") ?? "";
       final data = await ApiService.getLemburHrd(token);
 
-      final list = data.map<Map<String, dynamic>>((e) => Map<String, dynamic>.from(e)).toList();
+      final list = data
+          .map<Map<String, dynamic>>(
+              (e) => Map<String, dynamic>.from(e))
+          .toList();
 
-      // mapping nama_karyawan fallback
       for (var item in list) {
         final rawId = item['karyawan_id']?.toString();
         final id = int.tryParse(rawId ?? '') ?? 0;
-        item['nama_karyawan'] = 
-      item['nama_karyawan'] 
-      ?? item['nama'] 
-      ?? item['nama_lengkap']
-      ?? item['user']?['nama_lengkap']
-      ?? karyawanMap[id] 
-      ?? '-';
 
+        item['nama_karyawan'] =
+            item['nama_karyawan'] ??
+                item['nama'] ??
+                item['nama_lengkap'] ??
+                item['user']?['nama_lengkap'] ??
+                karyawanMap[id] ??
+                '-';
 
-        if (item['tanggal'] == null && item['tanggal_lembur'] != null) {
+        if (item['tanggal'] == null &&
+            item['tanggal_lembur'] != null) {
           item['tanggal'] = item['tanggal_lembur'];
         }
+
         // normalize status
-        item['status'] = (item['status'] ?? item['keterangan'] ?? 'Menunggu').toString();
+        item['status'] =
+            (item['status'] ?? item['keterangan'] ?? 'menunggu')
+                .toString()
+                .toLowerCase();
       }
 
-      // sort: newest first (prefer id, fallback created_at)
+      // sort terbaru
       list.sort((a, b) {
-        if (a.containsKey('id') && b.containsKey('id')) {
-          try {
-            return (b['id'] as dynamic).compareTo(a['id'] as dynamic);
-          } catch (_) {}
-        }
-        final da = DateTime.tryParse(a['created_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final db = DateTime.tryParse(b['created_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
-        return db.compareTo(da);
+        final ida = int.tryParse(a['id']?.toString() ?? '') ?? 0;
+        final idb = int.tryParse(b['id']?.toString() ?? '') ?? 0;
+        return idb.compareTo(ida);
       });
 
       lemburList.assignAll(list);
@@ -85,42 +102,48 @@ class HrdLemburController extends GetxController {
     }
   }
 
-  Future<void> approveLembur(int id) async {
+  // ======================
+  // APPROVE LEMBUR
+  // ======================
+  Future<bool> approveLembur(int id) async {
     try {
       final token = box.read("token") ?? "";
-      final resp = await ApiService.approveLembur(id, token);
-      Get.snackbar("Berhasil", "Pengajuan lembur disetujui");
-      // refetch data supaya server state sinkron
-      await fetchData();
+      await ApiService.approveLembur(id, token);
 
-      // try update user local list if exists
-      try {
-        final lemburController = Get.find<dynamic>(tag: 'lemburController');
-        // fallback: try without tag
-        if (lemburController != null) {
-          await lemburController.updateStatusLocal(id, 'Disetujui');
-        }
-      } catch (_) {}
+      // update local list
+      final index = lemburList.indexWhere((e) => e['id'] == id);
+      if (index != -1) {
+        lemburList[index]['status'] = 'disetujui';
+        lemburList.refresh();
+      }
+
+      Get.snackbar("Berhasil", "Pengajuan lembur disetujui");
+      return true;
     } catch (e) {
-      Get.snackbar("Error", "Gagal menyetujui: $e");
+      Get.snackbar("Error", "Gagal menyetujui lembur");
+      return false;
     }
   }
 
-  Future<void> rejectLembur(int id) async {
+  // ======================
+  // REJECT LEMBUR
+  // ======================
+  Future<bool> rejectLembur(int id) async {
     try {
       final token = box.read("token") ?? "";
-      final resp = await ApiService.rejectLembur(id, token);
-      Get.snackbar("Ditolak", "Pengajuan lembur ditolak");
-      await fetchData();
+      await ApiService.rejectLembur(id, token);
 
-      try {
-        final lemburController = Get.find<dynamic>(tag: 'lemburController');
-        if (lemburController != null) {
-          await lemburController.updateStatusLocal(id, 'Ditolak');
-        }
-      } catch (_) {}
+      final index = lemburList.indexWhere((e) => e['id'] == id);
+      if (index != -1) {
+        lemburList[index]['status'] = 'ditolak';
+        lemburList.refresh();
+      }
+
+      Get.snackbar("Ditolak", "Pengajuan lembur ditolak");
+      return true;
     } catch (e) {
-      Get.snackbar("Error", "Gagal menolak: $e");
+      Get.snackbar("Error", "Gagal menolak lembur");
+      return false;
     }
   }
 }
