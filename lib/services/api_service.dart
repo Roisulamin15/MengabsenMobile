@@ -411,4 +411,87 @@ request.fields['longitude'] = longitude.toString();
   return jsonDecode(response.body);
 }
 
+// =========================================
+// FORGOT PASSWORD - KIRIM OTP
+// =========================================
+static Future<void> forgotPassword(String email) async {
+  final url = Uri.parse('$baseUrl/forgot-password');
+
+  final response = await http.post(
+    url,
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    body: jsonEncode({
+      "email": email,
+    }),
+  );
+
+  if (response.statusCode != 200) {
+    final body = jsonDecode(response.body);
+    throw Exception(body['message'] ?? 'Gagal mengirim OTP');
+  }
+}
+
+// =========================================
+// VERIFIKASI OTP
+// =========================================
+static Future<void> verifyOtp({
+  required String email,
+  required String otp,
+}) async {
+  final url = Uri.parse('$baseUrl/verify-otp');
+
+  final response = await http.post(
+    url,
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    body: jsonEncode({
+      "email": email,
+      "otp": otp,
+    }),
+  );
+
+  if (response.statusCode != 200) {
+    final body = jsonDecode(response.body);
+    throw Exception(body['message'] ?? 'OTP salah atau kadaluarsa');
+  }
+}
+
+// =========================================
+// RESET PASSWORD
+// =========================================
+static Future<void> resetPassword({
+  required String email,
+  required String otp, // ✅ TAMBAHKAN
+  required String password,
+  required String passwordConfirmation,
+}) async {
+  final url = Uri.parse('$baseUrl/reset-password');
+
+  final response = await http.post(
+    url,
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    body: jsonEncode({
+      "email": email,
+      "otp": otp, // ✅ KIRIM OTP KE BACKEND
+      "password": password,
+      "password_confirmation": passwordConfirmation,
+    }),
+  );
+
+  if (response.statusCode != 200) {
+    final body = jsonDecode(response.body);
+    throw Exception(body['message'] ?? 'Gagal reset password');
+  }
+}
+
+
+
 }

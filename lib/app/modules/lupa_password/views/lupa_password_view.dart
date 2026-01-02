@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_mengabsen/app/routes/app_pages.dart';
 import 'package:get/get.dart';
-import '../controllers/lupa_password_controller.dart';
+import 'package:flutter_application_mengabsen/app/modules/lupa_password/controllers/lupa_password_controller.dart';
 
 class LupaPasswordView extends GetView<LupaPasswordController> {
   const LupaPasswordView({super.key});
@@ -42,6 +41,7 @@ class LupaPasswordView extends GetView<LupaPasswordController> {
                   Expanded(
                     child: TextField(
                       controller: controller.emailController,
+                      keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         hintText: "Masukan Email Anda",
@@ -63,12 +63,9 @@ class LupaPasswordView extends GetView<LupaPasswordController> {
                   backgroundColor: Colors.orange,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
-                  ),  
+                  ),
                 ),
-                onPressed: () {
-                  controller.kirimEmail();
-                  Get.toNamed(Routes.VERIFIKASI_EMAIL);
-                },
+                onPressed: controller.kirimEmail,
                 child: const Text(
                   "Kirim",
                   style: TextStyle(fontSize: 16, color: Colors.white),
